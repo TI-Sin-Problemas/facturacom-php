@@ -4,8 +4,7 @@ namespace TiSinProblemas\FacturaCom\Resources;
 
 use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
-use TiSinProblemas\FacturaCom\Types\Cfdi as CfdiType;
-use TiSinProblemas\FacturaCom\Types\CfdiList;
+use TiSinProblemas\FacturaCom\Types;
 
 
 class Cfdi extends BaseCilent
@@ -39,17 +38,31 @@ class Cfdi extends BaseCilent
             "page" => $page,
             "per_page" => $per_page
         ])->getBody();
-        return new CfdiList(json_decode($response));
+        return new Types\CfdiList(json_decode($response));
     }
 
-    public function get_by_uid(string $uid)
+    /**
+     * Retrieves a Cfdi object by its ID and type.
+     *
+     * @param mixed $id The ID of the Cfdi object to retrieve.
+     * @param mixed $idType The type of ID being used for retrieval. "uid" or "uuid".
+     * @throws FacturaComException If an error occurs during retrieval.
+     * @return Types\Cfdi The retrieved Cfdi object.
+     */
+    private function get_by_id($id, $idType)
     {
-        $response = $this->get(["uid", $uid])->getBody();
+        if (!in_array($idType, ["uid", "uuid"])) {
+            throw new FacturaComException("Invalid ID type");
+        }
+
+        $response = $this->get([$idType, $id])->getBody();
         $dataObject = json_decode($response);
+
         if ($dataObject->status == "error") {
             throw new FacturaComException($dataObject->message);
         }
-        return new CfdiType(
+
+        return new Types\Cfdi(
             $dataObject->RazonSocialReceptor,
             $dataObject->Folio,
             $dataObject->UID,
@@ -66,5 +79,29 @@ class Cfdi extends BaseCilent
             $dataObject->Version,
             $dataObject->XML
         );
+    }
+
+    /**
+     * Retrieves a Cfdi object by its UID.
+     *
+     * @param string $uid The UID of the Cfdi object to retrieve.
+     * @throws FacturaComException If an error occurs during retrieval.
+     * @return Types\Cfdi The retrieved Cfdi object.
+     */
+    public function get_by_uid(string $uid)
+    {
+        return $this->get_by_id($uid, "uid");
+    }
+
+    /**
+     * Retrieves a Cfdi object by its UUID.
+     *
+     * @param string $uuid The UUID of the Cfdi object to retrieve.
+     * @throws FacturaComException If an error occurs during retrieval.
+     * @return Types\Cfdi The retrieved Cfdi object.
+     */
+    public function get_by_uuid(string $uuid)
+    {
+        return $this->get_by_id($uuid, "uuid");
     }
 }

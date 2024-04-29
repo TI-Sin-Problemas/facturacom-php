@@ -39,6 +39,7 @@ class Cfdi
      * @param mixed $status The status.
      * @param mixed $document_type The document type.
      * @param mixed $version The version.
+     * @param mixed $xml The xml content.
      */
     public function __construct(
         $recipient_company_name,
@@ -86,6 +87,11 @@ class CfdiList
     public $to;
     public $data;
 
+    /**
+     * Constructs a new instance of the class with the provided data.
+     *
+     * @param stdClass $data_class The data object containing information for the instance.
+     */
     public function __construct(stdClass $data_class)
     {
         $this->total = $data_class->total;
