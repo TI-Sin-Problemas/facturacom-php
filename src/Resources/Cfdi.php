@@ -2,7 +2,9 @@
 
 namespace TiSinProblemas\FacturaCom\Resources;
 
+use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
+use TiSinProblemas\FacturaCom\Types\Cfdi as CfdiType;
 use TiSinProblemas\FacturaCom\Types\CfdiList;
 
 
@@ -38,5 +40,31 @@ class Cfdi extends BaseCilent
             "per_page" => $per_page
         ])->getBody();
         return new CfdiList(json_decode($response));
+    }
+
+    public function get_by_uid(string $uid)
+    {
+        $response = $this->get(["uid", $uid])->getBody();
+        $dataObject = json_decode($response);
+        if ($dataObject->status == "error") {
+            throw new FacturaComException($dataObject->message);
+        }
+        return new CfdiType(
+            $dataObject->RazonSocialReceptor,
+            $dataObject->Folio,
+            $dataObject->UID,
+            $dataObject->UUID,
+            $dataObject->Subtotal,
+            $dataObject->Descuento,
+            $dataObject->Total,
+            $dataObject->ReferenceClient,
+            $dataObject->NumOrder,
+            $dataObject->Receptor,
+            $dataObject->FechaTimbrado,
+            $dataObject->Status,
+            $dataObject->TipoDocumento,
+            $dataObject->Version,
+            $dataObject->XML
+        );
     }
 }

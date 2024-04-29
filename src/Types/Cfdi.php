@@ -20,6 +20,7 @@ class Cfdi
     public $status;
     public $document_type;
     public $version;
+    public $xml;
 
     /**
      * Constructs a new instance of the Cfdi class.
@@ -53,7 +54,8 @@ class Cfdi
         $stamp_date,
         $status,
         $document_type,
-        $version
+        $version,
+        $xml = null
     ) {
         $this->recipient_company_name = $recipient_company_name;
         $this->folio = $folio;
@@ -69,6 +71,7 @@ class Cfdi
         $this->status = $status;
         $this->document_type = $document_type;
         $this->version = $version;
+        $this->xml = $xml;
     }
 }
 
@@ -94,20 +97,21 @@ class CfdiList
         $this->data = [];
         foreach ($data_class->data as $value) {
             $this->data[] = new Cfdi(
-                $value->recipient_company_name,
-                $value->folio,
-                $value->uid,
-                $value->uuid,
-                $value->subtotal,
-                $value->descuento,
-                $value->total,
-                $value->reference_client,
-                $value->num_order,
-                $value->recipient,
-                $value->stamp_date,
-                $value->status,
-                $value->document_type,
-                $value->version
+                $value->RazonSocialReceptor,
+                $value->Folio,
+                $value->UID,
+                $value->UUID,
+                $value->Subtotal,
+                $value->Descuento,
+                $value->Total,
+                $value->ReferenceClient,
+                $value->NumOrder,
+                $value->Receptor,
+                $value->FechaTimbrado,
+                $value->Status,
+                $value->TipoDocumento,
+                $value->Version,
+                property_exists($value, 'XML') ? $value->XML : null
             );
         }
     }
