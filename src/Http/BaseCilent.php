@@ -15,6 +15,7 @@ class BaseCilent
     protected $SANDBOX_MODE = false;
     protected $API_VERSION;
     protected $ENDPOINT;
+    protected $F_PLUGIN_HEADER = "9d4095c8f7ed5785cb14c0e3b033eeb8252416ed";
 
     /**
      * Constructs a new instance of the Cilent class.
@@ -74,6 +75,21 @@ class BaseCilent
     }
 
     /**
+     * Retrieves the headers for the HTTP request.
+     *
+     * @return array The headers for the HTTP request.
+     */
+    protected function get_headers()
+    {
+        return [
+            'Content-Type' => 'application/json',
+            'F-PLUGIN' => $this->F_PLUGIN_HEADER,
+            'F-Api-Key' => $this->API_KEY,
+            'F-Secret-Key' => $this->SECRET_KEY
+        ];
+    }
+
+    /**
      * Sends a GET request to the API with the given URL parameters and query parameters.
      *
      * @param array $url_params An array of URL parameters. Default is an empty array.
@@ -89,12 +105,7 @@ class BaseCilent
 
         try {
             $response = $client->request('GET', $params, [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'F-PLUGIN' => '9d4095c8f7ed5785cb14c0e3b033eeb8252416ed',
-                    'F-Api-Key' => $this->API_KEY,
-                    'F-Secret-Key' => $this->SECRET_KEY
-                ],
+                'headers' => $this->get_headers(),
                 'query' => $query_params
             ]);
         } catch (GuzzleException $e) {
