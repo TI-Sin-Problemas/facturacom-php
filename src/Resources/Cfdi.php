@@ -45,13 +45,13 @@ class Cfdi extends BaseCilent
      * Retrieves a Cfdi object by its ID and type.
      *
      * @param mixed $id The ID of the Cfdi object to retrieve.
-     * @param mixed $idType The type of ID being used for retrieval. "uid" or "uuid".
+     * @param mixed $idType The type of ID being used for retrieval. "uid", "uuid" or "folio".
      * @throws FacturaComException If an error occurs during retrieval.
      * @return Types\Cfdi The retrieved Cfdi object.
      */
-    private function get_by_id($id, $idType)
+    private function get_by_id(string $id, string $idType)
     {
-        if (!in_array($idType, ["uid", "uuid"])) {
+        if (!in_array($idType, ["uid", "uuid", "folio"])) {
             throw new FacturaComException("Invalid ID type");
         }
 
@@ -103,5 +103,16 @@ class Cfdi extends BaseCilent
     public function get_by_uuid(string $uuid)
     {
         return $this->get_by_id($uuid, "uuid");
+    }
+
+    /**
+     * Retrieves a Cfdi object by its folio.
+     *
+     * @param string $folio The folio of the Cfdi object to retrieve.
+     * @return Types\Cfdi The retrieved Cfdi object.
+     */
+    public function get_by_folio(string $folio)
+    {
+        return $this->get_by_id($folio, "folio");
     }
 }
