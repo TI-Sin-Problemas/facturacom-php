@@ -309,4 +309,22 @@ class Customer extends BaseCilent
 
         return $this->build_customer($response["Data"]);
     }
+
+    /**
+     * Deletes a customer by their unique identifier.
+     *
+     * @param string $uid The unique identifier of the customer to delete.
+     * @throws FacturaComException If an error occurs during the deletion process.
+     * @return string The message indicating the success of the deletion.
+     */
+    public function delete(string $uid)
+    {
+        $response = json_decode($this->post(["destroy", $uid])->getBody(), true);
+
+        if ($response["response"] != "success") {
+            throw new FacturaComException($response["message"]);
+        }
+
+        return $response["message"];
+    }
 }
