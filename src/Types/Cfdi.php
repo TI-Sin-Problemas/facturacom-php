@@ -2,7 +2,7 @@
 
 namespace TiSinProblemas\FacturaCom\Types;
 
-use stdClass;
+use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 
 class Cfdi
 {
@@ -88,38 +88,38 @@ class CfdiList
     public $data;
 
     /**
-     * Constructs a new instance of the class with the provided data.
+     * Constructs a new instance of the CfdiList class with the provided data.
      *
-     * @param array $data_class The data object containing information for the instance.
+     * @param int $total The total number of items in the list.
+     * @param int $per_page The number of items per page.
+     * @param int $current_page The current page number.
+     * @param int $last_page The last page number.
+     * @param int $from The starting index of the items in the list.
+     * @param int $to The ending index of the items in the list.
+     * @param Cfdi[] $data An array of Cfdi objects.
      */
-    public function __construct(array $data_class)
-    {
-        $this->total = $data_class["total"];
-        $this->per_page = $data_class["per_page"];
-        $this->current_page = $data_class["current_page"];
-        $this->last_page = $data_class["last_page"];
-        $this->from = $data_class["from"];
-        $this->to = $data_class["to"];
-        $this->data = [];
-        foreach ($data_class["data"] as $value) {
-            $this->data[] = new Cfdi(
-                $value["RazonSocialReceptor"],
-                $value["Folio"],
-                $value["UID"],
-                $value["UUID"],
-                $value["Subtotal"],
-                $value["Descuento"],
-                $value["Total"],
-                $value["ReferenceClient"],
-                $value["NumOrder"],
-                $value["Receptor"],
-                $value["FechaTimbrado"],
-                $value["Status"],
-                $value["TipoDocumento"],
-                $value["Version"],
-                array_key_exists("XML", $value) ? $value["XML"] : null
-            );
+    public function __construct(
+        int $total,
+        int $per_page,
+        int $current_page,
+        int $last_page,
+        int $from,
+        int $to,
+        array $data
+    ) {
+        foreach ($data as $cfdi) {
+            if (!($cfdi instanceof Cfdi)) {
+                throw new FacturaComException("Invalid Cfdi object in data array");
+            }
         }
+
+        $this->total = $total;
+        $this->per_page = $per_page;
+        $this->current_page = $current_page;
+        $this->last_page = $last_page;
+        $this->from = $from;
+        $this->to = $to;
+        $this->data = $data;
     }
 }
 

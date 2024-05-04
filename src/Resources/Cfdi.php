@@ -11,6 +11,27 @@ class Cfdi extends BaseCilent
 {
     protected $ENDPOINT = "cfdi";
 
+    private function build_cfdi($data)
+    {
+        return new Types\Cfdi(
+            $data["RazonSocialReceptor"],
+            $data["Folio"],
+            $data["UID"],
+            $data["UUID"],
+            $data["Subtotal"],
+            $data["Descuento"],
+            $data["Total"],
+            $data["ReferenceClient"],
+            $data["NumOrder"],
+            $data["Receptor"],
+            $data["FechaTimbrado"],
+            $data["Status"],
+            $data["TipoDocumento"],
+            $data["Version"],
+            array_key_exists("XML", $data) ? $data["XML"] : null
+        );
+    }
+
     /**
      * Retrieves all the CFDI documents based on specified parameters.
      *
@@ -20,7 +41,7 @@ class Cfdi extends BaseCilent
      * @param string $type_document The type of document to filter. Value must be a code from the SAT catalog 'Tipos de CFDI'. Default is null.
      * @param int $page The page number of the results. Default is null.
      * @param int $per_page The number of items per page. Default is null.
-     * @return CfdiList The list of CFDI documents.
+     * @return Types\CfdiList The list of CFDI documents.
      */
     public function all(
         int $month = null,
@@ -30,7 +51,7 @@ class Cfdi extends BaseCilent
         int $page = null,
         int $per_page = null
     ) {
-        $response = $this->get(["list"], [
+        $body = $this->get(["list"], [
             "month" => sprintf("%02d", $month),
             "year" => $year,
             "rfc" => $rfc,
@@ -38,7 +59,17 @@ class Cfdi extends BaseCilent
             "page" => $page,
             "per_page" => $per_page
         ])->getBody();
-        return new Types\CfdiList(json_decode($response));
+        $response = json_decode($body, true);
+
+        return new Types\CfdiList(
+            $response["total"],
+            $response["per_page"],
+            $response["current_page"],
+            $response["last_page"],
+            $response["from"],
+            $response["to"],
+            array_map([$this, 'build_cfdi'], $response["data"]),
+        );
     }
 
     /**
@@ -56,29 +87,13 @@ class Cfdi extends BaseCilent
         }
 
         $response = $this->get([$idType, $id])->getBody();
-        $dataObject = json_decode($response);
+        $data = json_decode($response, true);
 
-        if ($dataObject->status == "error") {
-            throw new FacturaComException($dataObject->message);
+        if ($data["status"] == "error") {
+            throw new FacturaComException($data->message);
         }
 
-        return new Types\Cfdi(
-            $dataObject->RazonSocialReceptor,
-            $dataObject->Folio,
-            $dataObject->UID,
-            $dataObject->UUID,
-            $dataObject->Subtotal,
-            $dataObject->Descuento,
-            $dataObject->Total,
-            $dataObject->ReferenceClient,
-            $dataObject->NumOrder,
-            $dataObject->Receptor,
-            $dataObject->FechaTimbrado,
-            $dataObject->Status,
-            $dataObject->TipoDocumento,
-            $dataObject->Version,
-            $dataObject->XML
-        );
+        return $this->build_cfdi($data);
     }
 
     /**
@@ -114,5 +129,9 @@ class Cfdi extends BaseCilent
     public function get_by_folio(string $folio)
     {
         return $this->get_by_id($folio, "folio");
+    }
+
+    public function create()
+    {
     }
 }
