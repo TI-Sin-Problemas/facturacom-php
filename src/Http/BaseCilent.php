@@ -90,6 +90,19 @@ class BaseCilent
     }
 
     /**
+     * Retrieves an HTTP client instance with the base URL set to the concatenation of the base URL, API version,
+     * endpoint, and a trailing slash.
+     *
+     * @return GuzzleHttp\Client The HTTP client instance.
+     */
+    protected function get_http_client()
+    {
+        $base_uri = $this->get_base_url() . '/' . $this->get_api_version() . '/' . $this->get_endpoint() . "/";
+        $client = new Client(['base_uri' => $base_uri]);
+        return $client;
+    }
+
+    /**
      * Sends a GET request to the API with the given URL parameters and query parameters.
      *
      * @param array $url_params An array of URL parameters. Default is an empty array.
@@ -99,9 +112,8 @@ class BaseCilent
      */
     protected function get($url_params = [], $query_params = [])
     {
-        $base_uri = $this->get_base_url() . '/' . $this->get_api_version() . '/' . $this->get_endpoint() . "/";
         $params = implode('/', $url_params);
-        $client = new Client(['base_uri' => $base_uri]);
+        $client = $this->get_http_client();
 
         try {
             $response = $client->request('GET', $params, [
