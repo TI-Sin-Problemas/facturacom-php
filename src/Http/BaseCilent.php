@@ -17,6 +17,9 @@ class BaseCilent
     protected $ENDPOINT;
     protected $F_PLUGIN_HEADER = "9d4095c8f7ed5785cb14c0e3b033eeb8252416ed";
 
+    private $STATUS_OK = 200;
+    private $STATUS_CREATED = 201;
+
     /**
      * Constructs a new instance of the Cilent class.
      *
@@ -124,7 +127,7 @@ class BaseCilent
             throw new FacturaComException($e->getMessage());
         }
 
-        if ($response->getStatusCode() != 200) {
+        if ($response->getStatusCode() != $this->STATUS_OK) {
             $message = json_decode($response->getBody())["message"];
             throw new FacturaComException($message);
         }
@@ -153,7 +156,7 @@ class BaseCilent
             throw new FacturaComException($e->getMessage());
         }
 
-        if ($response->getStatusCode() != 201) {
+        if (!in_array($response->getStatusCode(), [$this->STATUS_OK, $this->STATUS_CREATED])) {
             $message = json_decode($response->getBody())["message"];
             throw new FacturaComException($message);
         }

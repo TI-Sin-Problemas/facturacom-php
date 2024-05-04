@@ -143,8 +143,8 @@ class Customer extends BaseCilent
      * @param string $company_name The name of the company (Razon Social) of the customer.
      * @param string $zip_code The zip code of the customer.
      * @param string $email The email of the customer.
-     * @param string|null $cfdi_usage The CFDI usage (Uso de CFDI) code. Default is null.
      * @param int $tax_regime The tax regime of the customer (Regimen Fiscal).
+     * @param string|null $cfdi_usage The CFDI usage (Uso de CFDI) code. Default is null.
      * @param string|null $street The street name of the customer. Default is null.
      * @param string|null $street_number The street number of the customer. Default is null.
      * @param string|null $building_number The building number of the customer. Default is null.
@@ -168,9 +168,9 @@ class Customer extends BaseCilent
         string $company_name,
         string $zip_code,
         string $email,
-        string $cfdi_usage = null,
         int $tax_regime,
         string $street = null,
+        string $cfdi_usage = null,
         string $street_number = null,
         string $building_number = null,
         string $neighborhood = null,
@@ -186,7 +186,7 @@ class Customer extends BaseCilent
         string $email2 = null,
         string $email3 = null
     ) {
-        $response = $this->post(["create"], [
+        $data = [
             "rfc" => $rfc,
             "razons" => $company_name,
             "codpos" => $zip_code,
@@ -208,11 +208,105 @@ class Customer extends BaseCilent
             "telefono" => $phone,
             "email2" => $email2,
             "email3" => $email3
-        ]);
-        $body = json_decode($response->getBody(), true);
-        if ($body["status"] != "success") {
-            throw new FacturaComException($body["message"]);
+        ];
+
+        $response = json_decode($this->post(["create"], $data)->getBody(), true);
+        if ($response["status"] != "success") {
+            $msg = "";
+            foreach ($response["message"] as $key => $value) {
+                $msg .= $key . ": " . implode(" ", $value) . "\n";
+            }
+            throw new FacturaComException($msg);
         }
-        return $this->build_customer($body["Data"]);
+        return $this->build_customer($response["Data"]);
+    }
+
+    /**
+     * Updates a customer record with the provided data.
+     *
+     * @param string $uid The UID of the customer record to update.
+     * @param string|null $rfc The RFC (Registro Federal de Contribuyentes) of the customer. Optional.
+     * @param string|null $company_name The name of the company (Razon Social) of the customer. Optional.
+     * @param string|null $zip_code The zip code of the customer. Optional.
+     * @param string|null $email The email of the customer. Optional.
+     * @param int|null $tax_regime The tax regime of the customer (Regimen Fiscal). Optional.
+     * @param string|null $cfdi_usage The CFDI usage (Uso de CFDI) code. Optional.
+     * @param string|null $street The street name of the customer. Optional.
+     * @param string|null $street_number The street number of the customer. Optional.
+     * @param string|null $building_number The building number of the customer. Optional.
+     * @param string|null $neighborhood The neighborhood of the customer. Optional.
+     * @param string|null $city The city of the customer. Optional.
+     * @param string|null $municipality The municipality of the customer. Optional.
+     * @param string|null $locality The locality of the customer. Optional.
+     * @param string|null $state The state of the customer. Optional.
+     * @param string|null $country The country of the customer. Optional.
+     * @param string|null $foreign_tax_id The foreign tax ID of the customer. In case of foreign customers. Optional.
+     * @param string|null $first_name The first name of the customer. Optional.
+     * @param string|null $last_name The last name of the customer. Optional.
+     * @param string|null $phone The phone number of the customer. Optional.
+     * @param string|null $email2 The secondary email of the customer. Optional.
+     * @param string|null $email3 The tertiary email of the customer. Optional.
+     * @throws FacturaComException If the API response status is not "success".
+     * @return Types\Customer The updated customer data built from the API response.
+     */
+    public function update(
+        string $uid,
+        string $rfc = null,
+        string $company_name = null,
+        string $zip_code = null,
+        string $email = null,
+        int $tax_regime = null,
+        string $cfdi_usage = null,
+        string $street = null,
+        string $street_number = null,
+        string $building_number = null,
+        string $neighborhood = null,
+        string $city = null,
+        string $municipality = null,
+        string $locality = null,
+        string $state = null,
+        string $country = null,
+        string $foreign_tax_id = null,
+        string $first_name = null,
+        string $last_name = null,
+        string $phone = null,
+        string $email2 = null,
+        string $email3 = null
+    ) {
+        // build data
+        $data = [];
+        if ($rfc) $data["rfc"] = $rfc;
+        if ($company_name) $data["razons"] = $company_name;
+        if ($zip_code) $data["codpos"] = $zip_code;
+        if ($email) $data["email"] = $email;
+        if ($tax_regime) $data["regimen"] = $tax_regime;
+        if ($cfdi_usage) $data["usocfdi"] = $cfdi_usage;
+        if ($street) $data["calle"] = $street;
+        if ($street_number) $data["numero_exterior"] = $street_number;
+        if ($building_number) $data["numero_interior"] = $building_number;
+        if ($neighborhood) $data["colonia"] = $neighborhood;
+        if ($city) $data["ciudad"] = $city;
+        if ($municipality) $data["delegacion"] = $municipality;
+        if ($locality) $data["localidad"] = $locality;
+        if ($state) $data["estado"] = $state;
+        if ($country) $data["pais"] = $country;
+        if ($foreign_tax_id) $data["numregidtrib"] = $foreign_tax_id;
+        if ($first_name) $data["nombre"] = $first_name;
+        if ($last_name) $data["apellidos"] = $last_name;
+        if ($phone) $data["telefono"] = $phone;
+        if ($email2) $data["email2"] = $email2;
+        if ($email3) $data["email3"] = $email3;
+
+        $response = json_decode($this->post([$uid, "update"], $data)->getBody(), true);
+
+        if ($response["status"] != "success") {
+            $msg = "";
+            foreach ($response["message"] as $key => $value) {
+                $msg .= $key . ": " . implode(" ", $value) . "\n";
+            }
+            throw new FacturaComException($msg);
+        }
+
+        return $this->build_customer($response["Data"]);
     }
 }
