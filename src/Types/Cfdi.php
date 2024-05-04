@@ -90,35 +90,40 @@ class CfdiList
     /**
      * Constructs a new instance of the class with the provided data.
      *
-     * @param stdClass $data_class The data object containing information for the instance.
+     * @param array $data_class The data object containing information for the instance.
      */
-    public function __construct(stdClass $data_class)
+    public function __construct(array $data_class)
     {
-        $this->total = $data_class->total;
-        $this->per_page = $data_class->per_page;
-        $this->current_page = $data_class->current_page;
-        $this->last_page = $data_class->last_page;
-        $this->from = $data_class->from;
-        $this->to = $data_class->to;
+        $this->total = $data_class["total"];
+        $this->per_page = $data_class["per_page"];
+        $this->current_page = $data_class["current_page"];
+        $this->last_page = $data_class["last_page"];
+        $this->from = $data_class["from"];
+        $this->to = $data_class["to"];
         $this->data = [];
-        foreach ($data_class->data as $value) {
+        foreach ($data_class["data"] as $value) {
             $this->data[] = new Cfdi(
-                $value->RazonSocialReceptor,
-                $value->Folio,
-                $value->UID,
-                $value->UUID,
-                $value->Subtotal,
-                $value->Descuento,
-                $value->Total,
-                $value->ReferenceClient,
-                $value->NumOrder,
-                $value->Receptor,
-                $value->FechaTimbrado,
-                $value->Status,
-                $value->TipoDocumento,
-                $value->Version,
-                property_exists($value, 'XML') ? $value->XML : null
+                $value["RazonSocialReceptor"],
+                $value["Folio"],
+                $value["UID"],
+                $value["UUID"],
+                $value["Subtotal"],
+                $value["Descuento"],
+                $value["Total"],
+                $value["ReferenceClient"],
+                $value["NumOrder"],
+                $value["Receptor"],
+                $value["FechaTimbrado"],
+                $value["Status"],
+                $value["TipoDocumento"],
+                $value["Version"],
+                array_key_exists("XML", $value) ? $value["XML"] : null
             );
         }
     }
+}
+
+class Recipient
+{
+    public $address;
 }

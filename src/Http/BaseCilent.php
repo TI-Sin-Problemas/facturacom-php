@@ -130,4 +130,33 @@ class BaseCilent
         }
         return $response;
     }
+
+    /**
+     * Sends a POST request to the API with the given URL parameters and data.
+     *
+     * @param array $url_params An array of URL parameters. Default is an empty array.
+     * @param array $data The data to be sent in the request.
+     * @throws FacturaComException If the request fails or if the response status code is not 201.
+     * @return GuzzleHttp\Psr7\Response The response object from the API.
+     */
+    protected function post($url_params = [], $data = [])
+    {
+        $params = implode('/', $url_params);
+        $client = $this->get_http_client();
+
+        try {
+            $response = $client->request('POST', $params, [
+                'headers' => $this->get_headers(),
+                'json' => $data
+            ]);
+        } catch (GuzzleException $e) {
+            throw new FacturaComException($e->getMessage());
+        }
+
+        if ($response->getStatusCode() != 201) {
+            $message = json_decode($response->getBody())["message"];
+            throw new FacturaComException($message);
+        }
+        return $response;
+    }
 }
