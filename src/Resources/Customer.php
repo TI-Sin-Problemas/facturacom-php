@@ -10,6 +10,41 @@ class Customer extends BaseCilent
 {
     protected $ENDPOINT = "clients";
 
+    private function build_customer($data)
+    {
+        $contact = new Types\Contact(
+            $data["Contacto"]["Nombre"],
+            $data["Contacto"]["Apellidos"],
+            $data["Contacto"]["Email"],
+            $data["Contacto"]["Email2"],
+            $data["Contacto"]["Email3"],
+            $data["Contacto"]["Telefono"]
+        );
+
+        return new Types\Customer(
+            $data["UID"],
+            $data["RazonSocial"],
+            $data["RFC"],
+            $data["Regimen"],
+            $data["RegimenId"],
+            $data["Calle"],
+            $data["Numero"],
+            $data["Interior"],
+            $data["Colonia"],
+            $data["CodigoPostal"],
+            $data["Ciudad"],
+            $data["Delegacion"],
+            $data["Estado"],
+            key_exists("Localidad", $data) ? $data["Localidad"] : null,
+            $data["Pais"],
+            $data["NumRegIdTrib"],
+            $data["UsoCFDI"],
+            $contact,
+            $data["cfdis"],
+            $data["cuentas_banco"]
+        );
+    }
+
     /**
      * Retrieves all customers from the API and returns an array of Customer objects.
      *
@@ -24,35 +59,7 @@ class Customer extends BaseCilent
         }
         $ret = [];
         foreach ($response["data"] as $customer) {
-            $ret[] = new Types\Customer(
-                $customer["UID"],
-                $customer["RazonSocial"],
-                $customer["RFC"],
-                $customer["Regimen"],
-                $customer["RegimenId"],
-                $customer["Calle"],
-                $customer["Numero"],
-                $customer["Interior"],
-                $customer["Colonia"],
-                $customer["CodigoPostal"],
-                $customer["Ciudad"],
-                $customer["Delegacion"],
-                $customer["Estado"],
-                $customer["Localidad"],
-                $customer["Pais"],
-                $customer["NumRegIdTrib"],
-                $customer["UsoCFDI"],
-                new Types\Contact(
-                    $customer["Contacto"]["Nombre"],
-                    $customer["Contacto"]["Apellidos"],
-                    $customer["Contacto"]["Email"],
-                    $customer["Contacto"]["Email2"],
-                    $customer["Contacto"]["Email3"],
-                    $customer["Contacto"]["Telefono"]
-                ),
-                $customer["cfdis"],
-                $customer["cuentas_banco"]
-            );
+            $ret[] = $this->build_customer($customer);
         }
         return $ret;
     }
@@ -70,35 +77,26 @@ class Customer extends BaseCilent
         if ($response["status"] != "success") {
             throw new FacturaComException($response["message"]);
         }
-        $data = $response["Data"];
-        return new Types\Customer(
-            $data["UID"],
-            $data["RazonSocial"],
-            $data["RFC"],
-            $data["Regimen"],
-            $data["RegimenId"],
-            $data["Calle"],
-            $data["Numero"],
-            $data["Interior"],
-            $data["Colonia"],
-            $data["CodigoPostal"],
-            $data["Ciudad"],
-            $data["Delegacion"],
-            $data["Estado"],
-            $data["Localidad"],
-            $data["Pais"],
-            $data["NumRegIdTrib"],
-            $data["UsoCFDI"],
-            new Types\Contact(
-                $data["Contacto"]["Nombre"],
-                $data["Contacto"]["Apellidos"],
-                $data["Contacto"]["Email"],
-                $data["Contacto"]["Email2"],
-                $data["Contacto"]["Email3"],
-                $data["Contacto"]["Telefono"]
-            ),
-            $data["cfdis"],
-            $data["cuentas_banco"]
-        );
+        return $this->build_customer($response["Data"]);
+    }
+
+    /**
+     * Retrieves a list of customers by their duplicated RFC.
+     *
+     * @param string $rfc The duplicated RFC to search for.
+     * @throws FacturaComException If an error occurs during retrieval.
+     * @return array An array of customer objects.
+     */
+    public function filter_duplicated_by_rfc(string $rfc)
+    {
+        $response = json_decode($this->get(["rfc", $rfc])->getBody(), true);
+        if ($response["status"] != "success") {
+            throw new FacturaComException($response["message"]);
+        }
+        $ret = [];
+        foreach ($response["Data"] as $customer) {
+            $ret[] = $this->build_customer($customer);
+        }
+        return $ret;
     }
 }
