@@ -11,12 +11,14 @@ class Catalog
     public $products_services;
     public $customs;
     public $units_of_measure;
+    public $payment_methods;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
         $this->products_services = new ProductServiceCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->customs = new CustomsCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->units_of_measure = new UnitOfMeasureCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->payment_methods = new PaymentMethodCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -99,6 +101,26 @@ class UnitOfMeasureCatalog extends BaseCatalogClient
         $data = $this->execute_get_request(["ClaveUnidad"])["data"];
         return array_map(function ($item) {
             return new Types\UnitOfMeasure($item["key"], $item["name"]);
+        }, $data);
+    }
+}
+
+class PaymentMethodCatalog extends BaseCatalogClient
+{
+    /**
+     * Retrieves the payment method catalog from the API and returns an array of PaymentMethod objects.
+     *
+     * Retrieves the SAT catalog of Formas de Pago, which contains information about the available
+     * payment methods that can be used in invoices. The response is an array of PaymentMethod objects, each representing
+     * a specific payment method.
+     *
+     * @return Types\PaymentMethod[] An array of PaymentMethod objects representing the payment methods.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["FormaPago"])["data"];
+        return array_map(function ($item) {
+            return new Types\PaymentMethod($item["key"], $item["name"]);
         }, $data);
     }
 }

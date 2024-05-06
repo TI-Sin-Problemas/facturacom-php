@@ -2,10 +2,19 @@
 
 namespace TiSinProblemas\FacturaCom\Types;
 
-class ProductService
+class KeyNameObject
 {
     public $key;
     public $name;
+
+    public function __construct(string $key, string $name)
+    {
+        $this->key = $key;
+        $this->name = $name;
+    }
+}
+class ProductService extends KeyNameObject
+{
     public $complement;
 
     public function __construct(string $key, string $name, string $complement)
@@ -16,26 +25,14 @@ class ProductService
     }
 }
 
-class CustomsHouse
+class CustomsHouse extends KeyNameObject
 {
-    public $key;
-    public $name;
-
-    public function __construct(string $key, string $name)
-    {
-        $this->key = $key;
-        $this->name = $name;
-    }
 }
 
-class UnitOfMeasure
+class UnitOfMeasure extends KeyNameObject
 {
-    public $key;
-    public $name;
+}
 
-    public function __construct(string $key, string $name)
-    {
-        $this->key = $key;
-        $this->name = $name;
-    }
+class PaymentMethod extends KeyNameObject
+{
 }
