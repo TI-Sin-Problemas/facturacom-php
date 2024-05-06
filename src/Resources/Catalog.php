@@ -14,6 +14,7 @@ class Catalog
     public $payment_methods;
     public $taxes;
     public $payment_options;
+    public $currencies;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
@@ -23,6 +24,7 @@ class Catalog
         $this->payment_methods = new PaymentMethodCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->taxes = new TaxCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->payment_options = new PaymentOptionsCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->currencies = new CurrenciesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -165,6 +167,26 @@ class PaymentOptionsCatalog extends BaseCatalogClient
         $data = $this->execute_get_request(["MetodoPago"])["data"];
         return array_map(function ($item) {
             return new Types\PaymentOption($item["key"], $item["name"]);
+        }, $data);
+    }
+}
+
+class CurrenciesCatalog extends BaseCatalogClient
+{
+    /**
+     * Retrieves the currencies catalog from the API and returns an array of Currency objects.
+     *
+     * Retrieves the SAT catalog of Monedas, which contains information about the available
+     * currencies that can be used in invoices. The response is an array of Currency objects, each representing
+     * a specific currency.
+     *
+     * @return Types\Currency[] An array of Currency objects representing the currencies.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["Moneda"])["data"];
+        return array_map(function ($item) {
+            return new Types\Currency($item["key"], $item["name"]);
         }, $data);
     }
 }

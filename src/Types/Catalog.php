@@ -44,3 +44,7 @@ class Tax extends KeyNameObject
 class PaymentOption extends KeyNameObject
 {
 }
+
+class Currency extends KeyNameObject
+{
+}
