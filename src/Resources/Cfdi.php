@@ -2,15 +2,42 @@
 
 namespace TiSinProblemas\FacturaCom\Resources;
 
+use ReflectionClass;
 use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
 use TiSinProblemas\FacturaCom\Types;
+use TiSinProblemas\FacturaCom\Constants\DocumentType;
 
 
 class Cfdi extends BaseCilent
 {
     protected $ENDPOINT = "cfdi";
+    protected $API_VERSION = "v4";
 
+    /**
+     * Builds a Cfdi object based on the given data.
+     *
+     * @param array $data The data used to build the Cfdi object.
+     *                   The data should have the following structure:
+     *                   [
+     *                       "RazonSocialReceptor" => string,
+     *                       "Folio" => string,
+     *                       "UID" => string,
+     *                       "UUID" => string,
+     *                       "Subtotal" => float,
+     *                       "Descuento" => float,
+     *                       "Total" => float,
+     *                       "ReferenceClient" => string,
+     *                       "NumOrder" => string,
+     *                       "Receptor" => string,
+     *                       "FechaTimbrado" => string,
+     *                       "Status" => string,
+     *                       "TipoDocumento" => string,
+     *                       "Version" => string,
+     *                       "XML" => string|null
+     *                   ]
+     * @return Types\Cfdi The built Cfdi object.
+     */
     private function build_cfdi($data)
     {
         return new Types\Cfdi(

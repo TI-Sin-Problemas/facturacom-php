@@ -28,12 +28,11 @@ class BaseCilent
      * @param bool $SANDBOX_MODE Whether to use the sandbox or production API. Defaults to false.
      * @param string $API_VERSION The version of the API to use. Defaults to "v4".
      */
-    public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false, $API_VERSION = "v4")
+    public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
         $this->API_KEY = $API_KEY;
         $this->SECRET_KEY = $SECRET_KEY;
         $this->SANDBOX_MODE = $SANDBOX_MODE;
-        $this->API_VERSION = $API_VERSION;
     }
 
     /**

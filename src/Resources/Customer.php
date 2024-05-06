@@ -9,6 +9,7 @@ use TiSinProblemas\FacturaCom\Types;
 class Customer extends BaseCilent
 {
     protected $ENDPOINT = "clients";
+    protected $API_VERSION = "v1";
 
     /**
      * Builds a customer object based on the given data.
