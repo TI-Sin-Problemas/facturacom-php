@@ -12,6 +12,7 @@ class Catalog
     public $customs;
     public $units_of_measure;
     public $payment_methods;
+    public $taxes;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
@@ -19,6 +20,7 @@ class Catalog
         $this->customs = new CustomsCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->units_of_measure = new UnitOfMeasureCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->payment_methods = new PaymentMethodCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->taxes = new TaxCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -121,6 +123,26 @@ class PaymentMethodCatalog extends BaseCatalogClient
         $data = $this->execute_get_request(["FormaPago"])["data"];
         return array_map(function ($item) {
             return new Types\PaymentMethod($item["key"], $item["name"]);
+        }, $data);
+    }
+}
+
+class TaxCatalog extends BaseCatalogClient
+{
+    /**
+     * Retrieves the tax catalog from the API and returns an array of Tax objects.
+     *
+     * Retrieves the SAT catalog of Impuestos, which contains information about the available
+     * taxes that can be used in invoices. The response is an array of Tax objects, each representing
+     * a specific tax.
+     *
+     * @return Types\Tax[] An array of Tax objects representing the taxes.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["Impuesto"])["data"];
+        return array_map(function ($item) {
+            return new Types\Tax($item["key"], $item["name"]);
         }, $data);
     }
 }

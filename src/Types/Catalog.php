@@ -36,3 +36,7 @@ class UnitOfMeasure extends KeyNameObject
 class PaymentMethod extends KeyNameObject
 {
 }
+
+class Tax extends KeyNameObject
+{
+}
