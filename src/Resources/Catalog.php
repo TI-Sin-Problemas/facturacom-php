@@ -6,7 +6,19 @@ use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
 use TiSinProblemas\FacturaCom\Types;
 
-class Catalog extends BaseCilent
+class Catalog
+{
+    public $products_services;
+    public $customs;
+
+    public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
+    {
+        $this->products_services = new ProductServiceCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->customs = new CustomsCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+    }
+}
+
+class BaseCatalogClient extends BaseCilent
 {
     protected $ENDPOINT = "catalogo";
     protected $API_VERSION = "v3";
@@ -19,7 +31,7 @@ class Catalog extends BaseCilent
      * @throws FacturaComException If the API response status is not "success".
      * @return array The decoded JSON response data.
      */
-    private function execute_get_request(array $url_params, array $query_params = null)
+    protected function execute_get_request(array $url_params, array $query_params = null)
     {
         $response = $this->get($url_params, $query_params);
         $data = json_decode($response->getBody(), true);
@@ -28,35 +40,40 @@ class Catalog extends BaseCilent
         }
         return $data;
     }
+}
 
+
+class ProductServiceCatalog extends BaseCatalogClient
+{
     /**
      * Retrieves the product service catalog from the API and returns an array of ProductService objects.
      *
-     * This method retrieves the catalog of Clave Producto/Servicio, which contains information about the available
+     * Retrieves the SAT catalog of Clave Producto/Servicio, which contains information about the available
      * products and services that can be used in invoices. The response is an array of ProductService objects, each representing
      * a specific product or service.
      *
-     * @throws FacturaComException If the API response status is not "success".
      * @return Types\ProductService[] An array of ProductService objects representing the product services.
      */
-    public function products_services()
+    public function all()
     {
         $data = $this->execute_get_request(["ClaveProductServ"])["data"];
-
         return array_map(function ($item) {
             return new Types\ProductService($item["key"], $item["name"], $item["complement"]);
         }, $data);
     }
+}
 
+class CustomsCatalog extends BaseCatalogClient
+{
     /**
      * Retrieves the customs data from the API and returns an array of CustomsHouse objects.
      *
-     * This method retrieves the SAT catalog of Aduanas, which contains information about the available customs entry ports
+     * Retrieves the SAT catalog of Aduanas, which contains information about the available customs entry ports
      * that can be used. The response is an array of CustomsHouse objects, each representing a specific customs entry port.
      *
      * @return Types\CustomsHouse[] An array of CustomsHouse objects representing the customs houses.
      */
-    public function customs()
+    public function all()
     {
         $data = $this->execute_get_request(["Aduana"])["data"];
 
