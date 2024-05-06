@@ -13,6 +13,7 @@ class Catalog
     public $units_of_measure;
     public $payment_methods;
     public $taxes;
+    public $payment_options;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
@@ -21,6 +22,7 @@ class Catalog
         $this->units_of_measure = new UnitOfMeasureCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->payment_methods = new PaymentMethodCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->taxes = new TaxCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->payment_options = new PaymentOptionsCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -143,6 +145,26 @@ class TaxCatalog extends BaseCatalogClient
         $data = $this->execute_get_request(["Impuesto"])["data"];
         return array_map(function ($item) {
             return new Types\Tax($item["key"], $item["name"]);
+        }, $data);
+    }
+}
+
+class PaymentOptionsCatalog extends BaseCatalogClient
+{
+    /**
+     * Retrieves the payment options catalog from the API and returns an array of PaymentOption objects.
+     *
+     * Retrieves the SAT catalog of Metodos de Pago, which contains information about the available
+     * payment options that can be used in invoices. The response is an array of PaymentOption objects, each representing
+     * a specific payment option.
+     *
+     * @return Types\PaymentOption[] An array of PaymentOption objects representing the payment options.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["MetodoPago"])["data"];
+        return array_map(function ($item) {
+            return new Types\PaymentOption($item["key"], $item["name"]);
         }, $data);
     }
 }
