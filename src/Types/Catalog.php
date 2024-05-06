@@ -27,3 +27,15 @@ class CustomsHouse
         $this->name = $name;
     }
 }
+
+class UnitOfMeasure
+{
+    public $key;
+    public $name;
+
+    public function __construct(string $key, string $name)
+    {
+        $this->key = $key;
+        $this->name = $name;
+    }
+}

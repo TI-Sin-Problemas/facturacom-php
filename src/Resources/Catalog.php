@@ -10,11 +10,13 @@ class Catalog
 {
     public $products_services;
     public $customs;
+    public $units_of_measure;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
         $this->products_services = new ProductServiceCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->customs = new CustomsCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->units_of_measure = new UnitOfMeasureCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -41,7 +43,6 @@ class BaseCatalogClient extends BaseCilent
         return $data;
     }
 }
-
 
 class ProductServiceCatalog extends BaseCatalogClient
 {
@@ -76,9 +77,28 @@ class CustomsCatalog extends BaseCatalogClient
     public function all()
     {
         $data = $this->execute_get_request(["Aduana"])["data"];
-
         return array_map(function ($item) {
             return new Types\CustomsHouse($item["key"], $item["name"]);
+        }, $data);
+    }
+}
+
+class UnitOfMeasureCatalog extends BaseCatalogClient
+{
+    /**
+     * Retrieves the unit of measure catalog from the API and returns an array of UnitOfMeasure objects.
+     *
+     * Retrieves the SAT catalog of Unidades de Medida, which contains information about the available
+     * units of measure that can be used in invoices. The response is an array of UnitOfMeasure objects, each representing
+     * a specific unit of measure.
+     *
+     * @return Types\UnitOfMeasure[] An array of UnitOfMeasure objects representing the units of measure.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["ClaveUnidad"])["data"];
+        return array_map(function ($item) {
+            return new Types\UnitOfMeasure($item["key"], $item["name"]);
         }, $data);
     }
 }
