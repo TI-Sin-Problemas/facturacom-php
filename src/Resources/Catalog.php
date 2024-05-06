@@ -32,7 +32,7 @@ class Catalog extends BaseCilent
     /**
      * Retrieves the product service catalog from the API and returns an array of ProductService objects.
      *
-     * This endpoint retrieves the catalog of Clave Producto/Servicio, which contains information about the available
+     * This method retrieves the catalog of Clave Producto/Servicio, which contains information about the available
      * products and services that can be used in invoices. The response is an array of ProductService objects, each representing
      * a specific product or service.
      *
@@ -41,10 +41,27 @@ class Catalog extends BaseCilent
      */
     public function products_services()
     {
-        $data = $this->execute_get_request(["ClaveProductServ"]);
+        $data = $this->execute_get_request(["ClaveProductServ"])["data"];
 
         return array_map(function ($item) {
             return new Types\ProductService($item["key"], $item["name"], $item["complement"]);
-        }, $data["data"]);
+        }, $data);
+    }
+
+    /**
+     * Retrieves the customs data from the API and returns an array of CustomsHouse objects.
+     *
+     * This method retrieves the SAT catalog of Aduanas, which contains information about the available customs entry ports
+     * that can be used. The response is an array of CustomsHouse objects, each representing a specific customs entry port.
+     *
+     * @return Types\CustomsHouse[] An array of CustomsHouse objects representing the customs houses.
+     */
+    public function customs()
+    {
+        $data = $this->execute_get_request(["Aduana"])["data"];
+
+        return array_map(function ($item) {
+            return new Types\CustomsHouse($item["key"], $item["name"]);
+        }, $data);
     }
 }
