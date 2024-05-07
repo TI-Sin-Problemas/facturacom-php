@@ -60,3 +60,15 @@ class TaxRegime extends KeyNameObject
 class RelationType extends KeyNameObject
 {
 }
+
+class CfdiUsage extends KeyNameObject
+{
+    public $use;
+
+    public function __construct(string $key, string $name, string $use)
+    {
+        $this->key = $key;
+        $this->name = $name;
+        $this->use = $use;
+    }
+}
