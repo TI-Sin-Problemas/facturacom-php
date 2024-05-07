@@ -17,6 +17,7 @@ class Catalog
     public $currencies;
     public $countries;
     public $tax_regimes;
+    public $relation_types;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
@@ -29,6 +30,7 @@ class Catalog
         $this->currencies = new CurrenciesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->countries = new CountriesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->tax_regimes = new TaxRegimesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->relation_types = new RelationTypesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -231,6 +233,26 @@ class TaxRegimesCatalog extends BaseCatalogClient
         $data = $this->execute_get_request(["RegimenFiscal"])["data"];
         return array_map(function ($item) {
             return new Types\TaxRegime($item["key"], $item["name"]);
+        }, $data);
+    }
+}
+
+class RelationTypesCatalog extends BaseCatalogClient
+{
+    /**
+     * Retrieves the relation type catalog from the API and returns an array of RelationType objects.
+     *
+     * Retrieves the SAT catalog of Tipos de Relacion, which contains information about the available
+     * relation types that can be used in CFDI objects. The response is an array of RelationType objects, each representing
+     * a specific relation type.
+     *
+     * @return Types\RelationType[] An array of RelationType objects representing the relation types.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["Relacion"])["data"];
+        return array_map(function ($item) {
+            return new Types\RelationType($item["key"], $item["name"]);
         }, $data);
     }
 }

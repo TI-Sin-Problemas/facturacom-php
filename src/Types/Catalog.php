@@ -56,3 +56,7 @@ class Country extends KeyNameObject
 class TaxRegime extends KeyNameObject
 {
 }
+
+class RelationType extends KeyNameObject
+{
+}
