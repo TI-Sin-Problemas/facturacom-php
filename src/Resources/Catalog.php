@@ -16,6 +16,7 @@ class Catalog
     public $payment_options;
     public $currencies;
     public $countries;
+    public $tax_regimes;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
@@ -27,6 +28,7 @@ class Catalog
         $this->payment_options = new PaymentOptionsCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->currencies = new CurrenciesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->countries = new CountriesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->tax_regimes = new TaxRegimesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -209,6 +211,26 @@ class CountriesCatalog extends BaseCatalogClient
         $data = $this->execute_get_request(["Pais"])["data"];
         return array_map(function ($item) {
             return new Types\Country($item["key"], $item["name"]);
+        }, $data);
+    }
+}
+
+class TaxRegimesCatalog extends BaseCatalogClient
+{
+    /**
+     * Retrieves the tax regime catalog from the API and returns an array of TaxRegime objects.
+     *
+     * Retrieves the SAT catalog of Regimen Fiscal, which contains information about the available
+     * tax regimes that can be used in invoices. The response is an array of TaxRegime objects, each representing
+     * a specific tax regime.
+     *
+     * @return Types\TaxRegime[] An array of TaxRegime objects representing the tax regimes.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["RegimenFiscal"])["data"];
+        return array_map(function ($item) {
+            return new Types\TaxRegime($item["key"], $item["name"]);
         }, $data);
     }
 }

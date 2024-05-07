@@ -52,3 +52,7 @@ class Currency extends KeyNameObject
 class Country extends KeyNameObject
 {
 }
+
+class TaxRegime extends KeyNameObject
+{
+}
