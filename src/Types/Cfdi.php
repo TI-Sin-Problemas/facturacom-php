@@ -2,7 +2,9 @@
 
 namespace TiSinProblemas\FacturaCom\Types;
 
-use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
+use ReflectionClass;
+use TiSinProblemas\FacturaCom\Constants\TaxFactorType;
+use ValueError;
 
 class Cfdi
 {
@@ -109,7 +111,7 @@ class CfdiList
     ) {
         foreach ($data as $cfdi) {
             if (!($cfdi instanceof Cfdi)) {
-                throw new FacturaComException("Invalid Cfdi object in data array");
+                throw new ValueError("Invalid Cfdi object in data array");
             }
         }
 
@@ -123,7 +125,112 @@ class CfdiList
     }
 }
 
-class Recipient
+class Tax
+{
+    public $base;
+    public $code;
+    public $factor_type;
+    public $rate_or_amount;
+    public $amount;
+
+
+    /**
+     * Constructs a new instance of the Tax class.
+     *
+     * @param float $base The value on which the tax will be calculated. Example: 15000.00
+     * @param string $code The key corresponding to the tax you want to add. Example: "002".
+     *                    Retrieve the catalog of codes using the `FacturaCom()->catalog->taxes->all()` method.
+     * @param float $rate_or_amount The rate or amount corresponding to the tax you want to add. Example: 0.16
+     * @param float $amount The amount of the transferred tax that applies to each item. Negative values are not allowed. Example: 2400.00
+     * @param string|TaxFactorType $factor_type The factor type corresponding to the tax you want to add. Example: "Tasa". Defaults to `TaxFactorType::TASA`.
+     */
+    public function __construct(
+        float $base,
+        string $code,
+        float $rate_or_amount,
+        float $amount,
+        string $factor_type = TaxFactorType::TASA
+    ) {
+        $tax_factor_reflection = new ReflectionClass(TaxFactorType::class);
+        $tax_factor_constants = $tax_factor_reflection->getConstants();
+        if (!in_array($factor_type, $tax_factor_constants)) {
+            throw new ValueError("Invalid factor type. Valid types are: " . implode(", ", $tax_factor_constants));
+        }
+
+        if ($amount < 0) {
+            throw new ValueError("Amount cannot be negative");
+        }
+
+        $this->base = $base;
+        $this->code = $code;
+        $this->rate_or_amount = $rate_or_amount;
+        $this->amount = $amount;
+        $this->factor_type = $factor_type;
+    }
+}
+
+class LocalTax
+{
+    public $code;
+    public $rate_or_amount;
+
+    /**
+     * Constructs a new instance of the LocalTaxe class.
+     *
+     * @param string $code The code of the tax. Valid codes are: 'CEDULAR', 'ISH'.
+     * @param float $rate_or_amount The rate or amount of the tax.
+     * @throws ValueError If the code is invalid.
+     */
+    public function __construct(string $code, float $rate_or_amount)
+    {
+        if (!in_array($code, ["CEDULAR", "ISH"])) {
+            throw new ValueError("Invalid code. Valid codes are: 'CEDULAR', 'ISH'");
+        }
+
+        $this->code = $code;
+        $this->rate_or_amount = $rate_or_amount;
+    }
+}
+
+class ItemTaxes
+{
+
+    public $transferred;
+    public $withheld;
+    public $local;
+
+    /**
+     * Constructs a new instance of the ItemTaxes class.
+     *
+     * @param Tax[] $transferred The transferred taxes for the item.
+     * @param Tax[] $withheld The withheld taxes for the item.
+     * @param LocalTax[] $local The local taxes for the item.
+     * @throws ValueError If any of the objects in the arrays are not of the expected type.
+     */
+    public function __construct(array $transferred, array $withheld, array $local)
+    {
+        foreach ($transferred as $tax) {
+            if (!($tax instanceof Tax)) {
+                throw new ValueError("Invalid Tax object in transferred_taxes array");
+            }
+        }
+        foreach ($withheld as $tax) {
+            if (!($tax instanceof Tax)) {
+                throw new ValueError("Invalid Tax object in withheld_taxes array");
+            }
+        }
+        foreach ($local as $tax) {
+            if (!($tax instanceof LocalTax)) {
+                throw new ValueError("Invalid LocalTax object in local_taxes array");
+            }
+        }
+
+        $this->transferred = $transferred;
+        $this->withheld = $withheld;
+        $this->local = $local;
+    }
+}
+
 {
     public $address;
 }
