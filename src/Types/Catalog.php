@@ -72,3 +72,7 @@ class CfdiUsage extends KeyNameObject
         $this->use = $use;
     }
 }
+
+class WithholdingType extends KeyNameObject
+{
+}

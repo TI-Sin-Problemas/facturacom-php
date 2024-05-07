@@ -19,6 +19,7 @@ class Catalog
     public $tax_regimes;
     public $relation_types;
     public $cfdi_usage;
+    public $withholding_types;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
@@ -33,6 +34,7 @@ class Catalog
         $this->tax_regimes = new TaxRegimesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->relation_types = new RelationTypesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->cfdi_usage = new CfdiUsageCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->withholding_types = new WithholdingTypesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -275,6 +277,42 @@ class CfdiUsageCatalog extends BaseCatalogClient
         $data = $this->execute_get_request(["UsoCfdi"])["data"];
         return array_map(function ($item) {
             return new Types\CfdiUsage($item["key"], $item["name"], $item["use"]);
+        }, $data);
+    }
+}
+
+class WithholdingTypesCatalog extends BaseCilent
+{
+    protected $ENDPOINT = "catalogos";
+    protected $API_VERSION = "v4";
+
+    /**
+     * Executes a GET request with the given URL parameters and optional query parameters.
+     *
+     * @param array $url_params The URL parameters for the GET request.
+     * @param array|null $query_params Optional query parameters for the GET request.
+     * @return array The decoded JSON response data.
+     */
+    protected function execute_get_request(array $url_params, array $query_params = null)
+    {
+        $response = $this->get($url_params, $query_params);
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Retrieves the withholding type catalog from the API and returns an array of WithholdingType objects.
+     *
+     * Retrieves the SAT catalog of Tipos de Retenciones, which contains information about the available
+     * withholding types that can be used in CFDI objects. The response is an array of WithholdingType objects, each representing
+     * a specific withholding type.
+     *
+     * @return Types\WithholdingType[] An array of WithholdingType objects representing the withholding types.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["retenciones", "claveRetencion"]);
+        return array_map(function ($item) {
+            return new Types\WithholdingType($item["key"], $item["name"]);
         }, $data);
     }
 }
