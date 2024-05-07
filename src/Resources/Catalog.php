@@ -15,6 +15,7 @@ class Catalog
     public $taxes;
     public $payment_options;
     public $currencies;
+    public $countries;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
     {
@@ -25,6 +26,7 @@ class Catalog
         $this->taxes = new TaxCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->payment_options = new PaymentOptionsCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->currencies = new CurrenciesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->countries = new CountriesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
 
@@ -187,6 +189,26 @@ class CurrenciesCatalog extends BaseCatalogClient
         $data = $this->execute_get_request(["Moneda"])["data"];
         return array_map(function ($item) {
             return new Types\Currency($item["key"], $item["name"]);
+        }, $data);
+    }
+}
+
+class CountriesCatalog extends BaseCatalogClient
+{
+    /**
+     * Retrieves the countries catalog from the API and returns an array of Country objects.
+     *
+     * Retrieves the SAT catalog of Paises, which contains information about the available
+     * countries that can be used. The response is an array of Country objects, each representing
+     * a specific country.
+     *
+     * @return Types\Country[] An array of Country objects representing the countries.
+     */
+    public function all()
+    {
+        $data = $this->execute_get_request(["Pais"])["data"];
+        return array_map(function ($item) {
+            return new Types\Country($item["key"], $item["name"]);
         }, $data);
     }
 }

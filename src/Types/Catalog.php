@@ -48,3 +48,7 @@ class PaymentOption extends KeyNameObject
 class Currency extends KeyNameObject
 {
 }
+
+class Country extends KeyNameObject
+{
+}
