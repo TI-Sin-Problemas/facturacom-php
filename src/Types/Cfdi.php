@@ -125,7 +125,7 @@ class CfdiList
     }
 }
 
-class Tax
+class ItemTax
 {
     public $base;
     public $code;
@@ -169,7 +169,7 @@ class Tax
     }
 }
 
-class LocalTax
+class LocalItemTax
 {
     public $code;
     public $rate_or_amount;
@@ -202,25 +202,25 @@ class ItemTaxes
     /**
      * Constructs a new instance of the ItemTaxes class.
      *
-     * @param Tax[] $transferred The transferred taxes for the item.
-     * @param Tax[] $withheld The withheld taxes for the item.
-     * @param LocalTax[] $local The local taxes for the item.
+     * @param ItemTax[] $transferred The transferred taxes for the item.
+     * @param ItemTax[] $withheld The withheld taxes for the item.
+     * @param LocalItemTax[] $local The local taxes for the item.
      * @throws ValueError If any of the objects in the arrays are not of the expected type.
      */
     public function __construct(array $transferred, array $withheld, array $local)
     {
         foreach ($transferred as $tax) {
-            if (!($tax instanceof Tax)) {
+            if (!($tax instanceof ItemTax)) {
                 throw new ValueError("Invalid Tax object in transferred_taxes array");
             }
         }
         foreach ($withheld as $tax) {
-            if (!($tax instanceof Tax)) {
+            if (!($tax instanceof ItemTax)) {
                 throw new ValueError("Invalid Tax object in withheld_taxes array");
             }
         }
         foreach ($local as $tax) {
-            if (!($tax instanceof LocalTax)) {
+            if (!($tax instanceof LocalItemTax)) {
                 throw new ValueError("Invalid LocalTax object in local_taxes array");
             }
         }
@@ -231,6 +231,101 @@ class ItemTaxes
     }
 }
 
+class BaseItem
 {
-    public $address;
+    public $product_service_code;
+    public $sku;
+    public $quantity;
+    public $unit_of_measure_code;
+    public $unit_price;
+    public $description;
+
+    /**
+     * Constructs a new instance of the class.
+     *
+     * @param string $product_service_code The code of the product or service according to the SAT Catalog.
+     *                                     Retrieve the catalog of codes using the `FacturaCom()->catalog->products_services->all()` method.
+     * @param int $quantity The quantity of items.
+     * @param string $unit_of_measure_code The code of the unit of measure according to the SAT Catalog.
+     *                                       Retrieve the catalog of codes using the `FacturaCom()->catalog->units_of_measure->all()` method.
+     * @param float $unit_price The price of the product or service per unit without taxes.
+     * @param string $description The description of the product or service.
+     * @param string|null $sku The SKU (Stock Keeping Unit) of the product or service.
+     */
+    public function __construct(
+        string $product_service_code,
+        int $quantity,
+        string $unit_of_measure_code,
+        float $unit_price,
+        string $description,
+        string $sku = null
+    ) {
+        $this->product_service_code = $product_service_code;
+        $this->quantity = $quantity;
+        $this->unit_of_measure_code = $unit_of_measure_code;
+        $this->unit_price = $unit_price;
+        $this->description = $description;
+        $this->sku = $sku;
+    }
+}
+class ItemPart extends BaseItem
+{
+}
+
+class Item extends BaseItem
+{
+    public $unit_of_measure_name;
+    public $discount_amount;
+    public $taxes;
+    public $customs_declaration_number; // Número de pedimento
+    public $property_tax_number; // Predial
+    public $parts;
+
+    /**
+     * Constructs a new instance of the Item class.
+     *
+     * The Item class represents a concept of CFDI invoice.
+     *
+     * @param string $product_service_code The code of the product or service according to the SAT Catalog.
+     *                                     Retrieve the catalog of codes using the `FacturaCom()->catalog->products_services->all()` method.
+     * @param int $quantity The quantity of items.
+     * @param string $unit_of_measure_code The code of the unit of measure according to the SAT Catalog.
+     *                                     Retrieve the catalog of codes using the `FacturaCom()->catalog->units_of_measure->all()` method.
+     * @param string $unit_of_measure_name The name of the unit of measure.
+     * @param float $unit_price The price of the item per unit without taxes.
+     * @param string $description The description of the item.
+     * @param float $discount_amount The amount of the discount.
+     * @param ItemTax[] $transferred_taxes The transferred taxes for the item.
+     * @param string|null $sku The SKU (Stock Keeping Unit) of the item.
+     * @param ItemTax[] $withheld_taxes The withheld taxes for the item. Default is []
+     * @param LocalItemTax[] $local_taxes The local taxes for the item. Default is []
+     * @param string|null $customs_declaration_number The number of the customs declaration.
+     * @param string|null $property_tax_number The property tax number (Predial).
+     * @param array $parts The parts or components of the item. Default is []
+     */
+    public function __construct(
+        string $product_service_code,
+        int $quantity,
+        string $unit_of_measure_code,
+        string $unit_of_measure_name,
+        float $unit_price,
+        string $description,
+        float $discount_amount,
+        array $transferred_taxes,
+        string $sku = null,
+        array $withheld_taxes = [],
+        array $local_taxes = [],
+        string $customs_declaration_number = null,
+        string $property_tax_number = null,
+        array $parts = [],
+    ) {
+        parent::__construct($product_service_code, $quantity, $unit_of_measure_code, $unit_price, $description, $sku);
+
+        $this->unit_of_measure_name = $unit_of_measure_name;
+        $this->discount_amount = $discount_amount;
+        $this->taxes = new ItemTaxes($transferred_taxes, $withheld_taxes, $local_taxes);
+        $this->customs_declaration_number = $customs_declaration_number;
+        $this->property_tax_number = $property_tax_number;
+        $this->parts = $parts;
+    }
 }
