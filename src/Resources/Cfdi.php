@@ -2,12 +2,14 @@
 
 namespace TiSinProblemas\FacturaCom\Resources;
 
+require_once __DIR__ . '/../Types/Cfdi.php';
+
 use ReflectionClass;
 use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
 use TiSinProblemas\FacturaCom\Types;
 use TiSinProblemas\FacturaCom\Constants\DocumentType;
-
+use TypeError;
 
 class Cfdi extends BaseCilent
 {
@@ -102,8 +104,8 @@ class Cfdi extends BaseCilent
     /**
      * Retrieves a Cfdi object by its ID and type.
      *
-     * @param mixed $id The ID of the Cfdi object to retrieve.
-     * @param mixed $idType The type of ID being used for retrieval. "uid", "uuid" or "folio".
+     * @param string $id The ID of the Cfdi object to retrieve.
+     * @param string $idType The type of ID being used for retrieval. "uid", "uuid" or "folio".
      * @throws FacturaComException If an error occurs during retrieval.
      * @return Types\Cfdi The retrieved Cfdi object.
      */
@@ -158,7 +160,42 @@ class Cfdi extends BaseCilent
         return $this->get_by_id($folio, "folio");
     }
 
-    public function create()
-    {
+
+    public function create(
+        string $customer_uid,
+        string $document_type,
+        array $items,
+        string $cfdi_usage,
+        int $series,
+        string $tax_residence = "",
+        bool $create_draft_on_error = false,
+        bool $draft = false,
+    ) {
+        $document_type_reflection = new ReflectionClass(DocumentType::class);
+        $valid_document_types = $document_type_reflection->getConstants();
+        if (!in_array($document_type, $valid_document_types)) {
+            throw new FacturaComException("Invalid document type. Valid types are: " . implode(", ", $valid_document_types));
+        }
+
+        foreach ($items as $item) {
+            if (!$item instanceof Types\Item) {
+                throw new TypeError("Invalid item type. Expected Types\Item instance");
+            }
+        }
+
+        $recipient = [
+            "UID" => $customer_uid,
+            "ResidenciaFiscal" => $tax_residence
+        ];
+
+        $data = [
+            "Receptor" => $recipient,
+            "TipoDocumento" => $document_type,
+            "BorradorSiFalla" => intval($create_draft_on_error),
+            "Draft" => intval($draft),
+            "Conceptos" => array_map(fn ($item) => $item->get_data_for_api(), $items),
+            "UsoCFDI" => $cfdi_usage,
+            "Serie" => $series
+        ];
     }
 }
