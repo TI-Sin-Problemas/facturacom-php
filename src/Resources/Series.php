@@ -42,4 +42,22 @@ class Series extends BaseCilent
             $response["data"]
         );
     }
+
+    /**
+     * Retrieves a series by its unique identifier.
+     *
+     * @param string $uid The unique identifier of the series.
+     * @return Types\Series The series object with the specified unique identifier.
+     */
+    public function get_by_uid(string $uid): Types\Series
+    {
+        $response =  $this->execute_get_request([$uid]);
+        return new Types\Series(
+            $response["data"]["SerieID"],
+            $response["data"]["SerieName"],
+            $response["data"]["SerieType"],
+            $response["data"]["SerieDescription"],
+            $response["data"]["SerieStatus"]
+        );
+    }
 }
