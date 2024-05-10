@@ -125,7 +125,20 @@ class Series extends BaseCilent
      */
     public function enable(string $uid): string
     {
-        $response =  $this->execute_post_request([$uid, "up"]);
+        $response = $this->execute_post_request([$uid, "up"]);
+        return $response["message"];
+    }
+
+    /**
+     * Deletes a series by its unique identifier.
+     *
+     * @param string $uid The unique identifier of the series to delete.
+     * @throws FacturaComException If an error occurs during the deletion process.
+     * @return string The message indicating the success of the deletion.
+     */
+    public function delete(string $uid): string
+    {
+        $response = $this->execute_post_request([$uid, "drop"]);
         return $response["message"];
     }
 }
