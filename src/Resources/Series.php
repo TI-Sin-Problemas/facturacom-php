@@ -119,8 +119,8 @@ class Series extends BaseCilent
      */
     public function disable(string $uid): string
     {
-        $response =  $this->execute_post_request([$uid, "down"]);
-        return $response["message"];
+        $response = $this->execute_post_request([$uid, "down"]);
+        return $response["messsage"];
     }
 
     /**
@@ -133,7 +133,7 @@ class Series extends BaseCilent
     public function enable(string $uid): string
     {
         $response = $this->execute_post_request([$uid, "up"]);
-        return $response["message"];
+        return $response["messsage"];
     }
 
     /**
