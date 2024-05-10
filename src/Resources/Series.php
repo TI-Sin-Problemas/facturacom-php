@@ -25,7 +25,7 @@ class Series extends BaseCilent
         return $data;
     }
 
-    private function execute_post_request(array $url_params, array $data)
+    private function execute_post_request(array $url_params, array $data = null)
     {
         $response = $this->post($url_params, $data);
         $data = json_decode($response->getBody(), true);
@@ -100,6 +100,19 @@ class Series extends BaseCilent
         ];
 
         $response =  $this->execute_post_request(["create"], $data);
+        return $response["message"];
+    }
+
+    /**
+     * Disables a series by its unique identifier.
+     *
+     * @param string $uid The unique identifier of the series to disable.
+     * @throws FacturaComException If an error occurs during the disabling process.
+     * @return string The message indicating the success of the disabling.
+     */
+    public function disable(string $uid): string
+    {
+        $response =  $this->execute_post_request([$uid, "down"]);
         return $response["message"];
     }
 }
