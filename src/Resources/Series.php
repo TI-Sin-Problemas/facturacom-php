@@ -29,7 +29,15 @@ class Series extends BaseCilent
     {
         $response = $this->post($url_params, $data);
         $data = json_decode($response->getBody(), true);
-        if ($data["status"] != "success") {
+
+        $status = "";
+        if (key_exists("status", $data)) {
+            $status = $data["status"];
+        } else if (key_exists("response", $data)) {
+            $status = $data["response"];
+        }
+
+        if ($status != "success") {
             throw new FacturaComException($data["message"]);
         }
         return $data;
