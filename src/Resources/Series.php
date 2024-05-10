@@ -86,14 +86,13 @@ class Series extends BaseCilent
      *
      * @param string $letter The letter of the series. With this parameter you can define a
      *                        letter as an identifier for the series.
-     * @param Constants\DocumentType $document_type The type of CFDI or document that corresponds
-     *                               to the series.
+     * @param string $document_type The type of CFDI or document that corresponds to the series.
      * @param int|null $folio It is used to define a custom number to start the counter for the
      *                        series(optional).
      * @throws FacturaComException If the document type is invalid.
      * @return string The message from the response.
      */
-    public function create(string $letter, Constants\DocumentType $document_type, int $folio = null): string
+    public function create(string $letter, string $document_type, int $folio = null): string
     {
         $document_type_reflection = new ReflectionClass(Constants\DocumentType::class);
         $valid_document_types = $document_type_reflection->getConstants();
