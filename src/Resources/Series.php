@@ -115,4 +115,17 @@ class Series extends BaseCilent
         $response =  $this->execute_post_request([$uid, "down"]);
         return $response["message"];
     }
+
+    /**
+     * Enables a series by its unique identifier.
+     *
+     * @param string $uid The unique identifier of the series to enable.
+     * @throws FacturaComException If an error occurs during the enabling process.
+     * @return string The message indicating the success of the enabling.
+     */
+    public function enable(string $uid): string
+    {
+        $response =  $this->execute_post_request([$uid, "up"]);
+        return $response["message"];
+    }
 }
