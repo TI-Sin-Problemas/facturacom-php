@@ -166,10 +166,14 @@ class Cfdi extends BaseCilent
         string $document_type,
         array $items,
         string $cfdi_usage,
-        int $series,
+        int $series_uid,
+        string $payment_method,
+        string $payment_option,
         string $tax_residence = "",
         bool $create_draft_on_error = false,
         bool $draft = false,
+        string $payment_terms = null,
+        array $related_cfdis = null
     ) {
         $document_type_reflection = new ReflectionClass(DocumentType::class);
         $valid_document_types = $document_type_reflection->getConstants();
@@ -180,6 +184,12 @@ class Cfdi extends BaseCilent
         foreach ($items as $item) {
             if (!$item instanceof Types\Item) {
                 throw new TypeError("Invalid item type. Expected Types\Item instance");
+            }
+        }
+
+        foreach ($related_cfdis as $related_cfdi) {
+            if (!$related_cfdi instanceof Types\RelatedCfdi) {
+                throw new TypeError("Invalid related CFDI type. Expected Types\RelatedCfdi instance");
             }
         }
 
@@ -195,7 +205,17 @@ class Cfdi extends BaseCilent
             "Draft" => intval($draft),
             "Conceptos" => array_map(fn ($item) => $item->get_data_for_api(), $items),
             "UsoCFDI" => $cfdi_usage,
-            "Serie" => $series
+            "Serie" => $series_uid,
+            "FormaPago" => $payment_method,
+            "MetodoPago" => $payment_option
         ];
+
+        if ($payment_terms) {
+            $data["CondicionesDePago"] = $payment_terms;
+        }
+
+        if ($related_cfdi) {
+            $data["CfdiRelacionados"] = $related_cfdi->get_data_for_api();
+        }
     }
 }

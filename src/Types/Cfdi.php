@@ -440,3 +440,28 @@ class Item extends BaseItem
         ];
     }
 }
+
+class RelatedCfdi
+{
+    public $uuid;
+    public $relation_type;
+
+    /**
+     * Constructs a new instance of the class.
+     *
+     * @param string $uuid The UUID of the related CFDI.
+     * @param array $relation_type The type of relation between the CFDI and the series.
+     *                              You can retrieve the list of valid relation types using the
+     *                              FacturaCom()->catalog->relation_types->all() method.
+     */
+    public function __construct(string $uuid, array $relation_type)
+    {
+        $this->uuid = $uuid;
+        $this->relation_type = $relation_type;
+    }
+
+    public function get_data_for_api(): array
+    {
+        return ["UUID" => $this->uuid, "TipoRelacion" => $this->relation_type];
+    }
+}
