@@ -4,6 +4,7 @@ namespace TiSinProblemas\FacturaCom\Resources;
 
 require_once __DIR__ . '/../Types/Cfdi.php';
 
+use DateTime;
 use ReflectionClass;
 use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
@@ -15,6 +16,12 @@ class Cfdi extends BaseCilent
 {
     protected $ENDPOINT = "cfdi";
     protected $API_VERSION = "v4";
+
+
+    private function set_alternate_endpoint()
+    {
+        $this->ENDPOINT = "cfdi40";
+    }
 
     /**
      * Builds a Cfdi object based on the given data.
@@ -59,6 +66,19 @@ class Cfdi extends BaseCilent
             $data["Version"],
             array_key_exists("XML", $data) ? $data["XML"] : null
         );
+    }
+    private function execute_post_request(array $url_params, array $data = null)
+    {
+        $response = $this->post($url_params, $data);
+        $data = json_decode($response->getBody(), true);
+
+        if ($data["response"] != "success") {
+            if (is_array($data["message"])) {
+                throw new FacturaComException($data["message"]["message"]);
+            }
+            throw new FacturaComException($data["message"]);
+        }
+        return $data;
     }
 
     /**
@@ -169,11 +189,19 @@ class Cfdi extends BaseCilent
         int $series_uid,
         string $payment_method,
         string $payment_option,
+        string $currency = "MXN",
         string $tax_residence = "",
         bool $create_draft_on_error = false,
         bool $draft = false,
         string $payment_terms = null,
-        array $related_cfdis = null
+        array $related_cfdis = [],
+        float $exchange_rate = null,
+        string $order_number = null,
+        DateTime $date = null,
+        string $comments = null,
+        string $account = null,
+        bool $send_email = true,
+        string $expedition_place = null
     ) {
         $document_type_reflection = new ReflectionClass(DocumentType::class);
         $valid_document_types = $document_type_reflection->getConstants();
@@ -187,10 +215,16 @@ class Cfdi extends BaseCilent
             }
         }
 
+        $related = [];
         foreach ($related_cfdis as $related_cfdi) {
             if (!$related_cfdi instanceof Types\RelatedCfdi) {
                 throw new TypeError("Invalid related CFDI type. Expected Types\RelatedCfdi instance");
             }
+            $related[] = $related_cfdi->get_data_for_api();
+        }
+
+        if ($currency != "MXN" && !$exchange_rate) {
+            throw new FacturaComException("Exchange rate is required for non-MXN currencies");
         }
 
         $recipient = [
@@ -207,15 +241,45 @@ class Cfdi extends BaseCilent
             "UsoCFDI" => $cfdi_usage,
             "Serie" => $series_uid,
             "FormaPago" => $payment_method,
-            "MetodoPago" => $payment_option
+            "MetodoPago" => $payment_option,
+            "Moneda" => $currency,
+            "EnviarCorreo" => $send_email,
         ];
 
         if ($payment_terms) {
             $data["CondicionesDePago"] = $payment_terms;
         }
 
-        if ($related_cfdi) {
-            $data["CfdiRelacionados"] = $related_cfdi->get_data_for_api();
+        if (!empty($related)) {
+            $data["CfdiRelacionados"] = $related;
         }
+
+        if ($exchange_rate) {
+            $data["TipoCambio"] = $exchange_rate;
+        }
+
+        if ($order_number) {
+            $data["NumOrder"] = $order_number;
+        }
+
+        if ($date) {
+            $data["Fecha"] = $date->format("Y-m-d\TH:m:s");
+        }
+
+        if ($comments) {
+            $data["Comentarios"] = $comments;
+        }
+
+        if ($account) {
+            $data["Cuenta"] = $account;
+        }
+
+        if ($expedition_place) {
+            $data["LugarExpedicion"] = $expedition_place;
+        }
+
+        $this->set_alternate_endpoint();
+        $response = $this->execute_post_request(["create"], $data);
+        return new Types\CreatedCfdiResponse($response);
     }
 }

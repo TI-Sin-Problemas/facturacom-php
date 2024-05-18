@@ -2,6 +2,7 @@
 
 namespace TiSinProblemas\FacturaCom\Types;
 
+use DateTime;
 use ReflectionClass;
 use TiSinProblemas\FacturaCom\Constants\TaxFactorType;
 use TypeError;
@@ -463,5 +464,37 @@ class RelatedCfdi
     public function get_data_for_api(): array
     {
         return ["UUID" => $this->uuid, "TipoRelacion" => $this->relation_type];
+    }
+}
+
+class CreatedCfdiResponse
+{
+    public $message;
+    public $uuid;
+    public $uid;
+    public $date;
+    public $sat_certificate_number;
+    public $version;
+    public $sat_stamp;
+    public $cfd_stamp;
+    public $series;
+    public $folio;
+
+    public function __construct(array $data)
+    {
+        $this->message = $data["message"];
+        $this->uuid = $data["UUID"];
+        $this->uid = $data["uid"];
+
+        $sat = $data["SAT"];
+        $this->date = new DateTime($sat["FechaTimbrado"]);
+        $this->sat_certificate_number = $sat["NoCertificadoSAT"];
+        $this->version = $sat["Version"];
+        $this->sat_stamp = $sat["SelloSAT"];
+        $this->cfd_stamp = $sat["SelloCFD"];
+
+        $inv = $data["INV"];
+        $this->series = $inv["Serie"];
+        $this->folio = $inv["Folio"];
     }
 }
