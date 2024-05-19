@@ -20,7 +20,7 @@ class Catalog
     public $countries;
     public $tax_regimes;
     public $relation_types;
-    public $cfdi_usage;
+    public $cfdi_uses;
     public $withholding_types;
 
     public function __construct($API_KEY, $SECRET_KEY, $SANDBOX_MODE = false)
@@ -35,7 +35,7 @@ class Catalog
         $this->countries = new CountriesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->tax_regimes = new TaxRegimesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->relation_types = new RelationTypesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
-        $this->cfdi_usage = new CfdiUsageCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
+        $this->cfdi_uses = new CfdiUsesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
         $this->withholding_types = new WithholdingTypesCatalog($API_KEY, $SECRET_KEY, $SANDBOX_MODE);
     }
 }
@@ -263,22 +263,22 @@ class RelationTypesCatalog extends BaseCatalogClient
     }
 }
 
-class CfdiUsageCatalog extends BaseCatalogClient
+class CfdiUsesCatalog extends BaseCatalogClient
 {
     /**
-     * Retrieves the CFDI use catalog from the API and returns an array of CfdiUsage objects.
+     * Retrieves the CFDI use catalog from the API and returns an array of CfdiUse objects.
      *
      * Retrieves the SAT catalog of Uso de CFDI, which contains information about the available
-     * CFDI uses that can be used in CFDI objects. The response is an array of CfdiUsage objects, each representing
+     * CFDI uses that can be used in CFDI objects. The response is an array of CfdiUse objects, each representing
      * a specific CFDI use.
      *
-     * @return Types\CfdiUsage[] An array of CfdiUsage objects representing the CFDI uses.
+     * @return Types\CfdiUse[] An array of CfdiUse objects representing the CFDI uses.
      */
     public function all()
     {
         $data = $this->execute_get_request(["UsoCfdi"])["data"];
         return array_map(function ($item) {
-            return new Types\CfdiUsage($item["key"], $item["name"], $item["use"]);
+            return new Types\CfdiUse($item["key"], $item["name"], $item["use"]);
         }, $data);
     }
 }

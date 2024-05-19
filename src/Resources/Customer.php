@@ -147,7 +147,7 @@ class Customer extends BaseCilent
      * @param string $zip_code The zip code of the customer.
      * @param string $email The email of the customer.
      * @param int $tax_regime The tax regime of the customer (Regimen Fiscal).
-     * @param string|null $cfdi_usage The CFDI usage (Uso de CFDI) code. Default is null.
+     * @param string|null $cfdi_use The CFDI use (Uso de CFDI) code. Default is null.
      * @param string|null $street The street name of the customer. Default is null.
      * @param string|null $street_number The street number of the customer. Default is null.
      * @param string|null $building_number The building number of the customer. Default is null.
@@ -173,7 +173,7 @@ class Customer extends BaseCilent
         string $email,
         int $tax_regime,
         string $street = null,
-        string $cfdi_usage = null,
+        string $cfdi_use = null,
         string $street_number = null,
         string $building_number = null,
         string $neighborhood = null,
@@ -194,7 +194,7 @@ class Customer extends BaseCilent
             "razons" => $company_name,
             "codpos" => $zip_code,
             "email" => $email,
-            "usocfdi" => $cfdi_usage,
+            "usocfdi" => $cfdi_use,
             "regimen" => $tax_regime,
             "calle" => $street,
             "numero_exterior" => $street_number,
@@ -233,7 +233,7 @@ class Customer extends BaseCilent
      * @param string|null $zip_code The zip code of the customer. Optional.
      * @param string|null $email The email of the customer. Optional.
      * @param int|null $tax_regime The tax regime of the customer (Regimen Fiscal). Optional.
-     * @param string|null $cfdi_usage The CFDI usage (Uso de CFDI) code. Optional.
+     * @param string|null $cfdi_use The CFDI use (Uso de CFDI) code. Optional.
      * @param string|null $street The street name of the customer. Optional.
      * @param string|null $street_number The street number of the customer. Optional.
      * @param string|null $building_number The building number of the customer. Optional.
@@ -259,7 +259,7 @@ class Customer extends BaseCilent
         string $zip_code = null,
         string $email = null,
         int $tax_regime = null,
-        string $cfdi_usage = null,
+        string $cfdi_use = null,
         string $street = null,
         string $street_number = null,
         string $building_number = null,
@@ -283,7 +283,7 @@ class Customer extends BaseCilent
         if ($zip_code) $data["codpos"] = $zip_code;
         if ($email) $data["email"] = $email;
         if ($tax_regime) $data["regimen"] = $tax_regime;
-        if ($cfdi_usage) $data["usocfdi"] = $cfdi_usage;
+        if ($cfdi_use) $data["usocfdi"] = $cfdi_use;
         if ($street) $data["calle"] = $street;
         if ($street_number) $data["numero_exterior"] = $street_number;
         if ($building_number) $data["numero_interior"] = $building_number;

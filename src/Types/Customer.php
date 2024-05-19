@@ -57,7 +57,7 @@ class Customer
     public $locality; // Localidad
     public $country;
     public $foreign_tax_id; // NumRegIdTrib
-    public $cfdi_usage; // UsoCFDI
+    public $cfdi_use; // UsoCFDI
     public $contact;
     public $cfdi_qty;
     public $bank_accounts;
@@ -81,7 +81,7 @@ class Customer
      * @param string|null $locality The locality of the Customer.
      * @param string $country The country of the Customer.
      * @param string|null $foreign_tax_id The number of registration ID of the Customer.
-     * @param string|null $cfdi_usage The CFDI usage of the Customer.
+     * @param string|null $cfdi_use The CFDI use of the Customer.
      * @param Contact $contact The contact information of the Customer.
      * @param int $cfdi_qty The CFDI quantity of the Customer.
      * @param array $bank_accounts The bank accounts of the Customer.
@@ -104,7 +104,7 @@ class Customer
         string $locality = null,
         string $country,
         string $foreign_tax_id = null,
-        string $cfdi_usage = null,
+        string $cfdi_use = null,
         Contact $contact,
         int $cfdi_qty,
         array $bank_accounts
@@ -125,7 +125,7 @@ class Customer
         $this->locality = $locality;
         $this->country = $country;
         $this->foreign_tax_id = $foreign_tax_id;
-        $this->cfdi_usage = $cfdi_usage;
+        $this->cfdi_use = $cfdi_use;
         $this->contact = $contact;
         $this->cfdi_qty = $cfdi_qty;
         $this->bank_accounts = $bank_accounts;

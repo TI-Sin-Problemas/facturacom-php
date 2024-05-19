@@ -61,7 +61,7 @@ class RelationType extends KeyNameObject
 {
 }
 
-class CfdiUsage extends KeyNameObject
+class CfdiUse extends KeyNameObject
 {
     public $use;
 
