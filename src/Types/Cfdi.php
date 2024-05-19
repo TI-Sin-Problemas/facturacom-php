@@ -79,16 +79,28 @@ class Cfdi
     }
 }
 
-
-class CfdiList
+abstract class AbstractList
 {
     public $total;
     public $per_page;
     public $current_page;
     public $last_page;
+    public $data;
+
+    public function __construct(int $total, int $per_page, int $current_page, int $last_page, array $data = [])
+    {
+        $this->total = $total;
+        $this->per_page = $per_page;
+        $this->current_page = $current_page;
+        $this->last_page = $last_page;
+        $this->data = $data;
+    }
+}
+
+class CfdiList extends AbstractList
+{
     public $from;
     public $to;
-    public $data;
 
     /**
      * Constructs a new instance of the CfdiList class with the provided data.
@@ -116,13 +128,10 @@ class CfdiList
             }
         }
 
-        $this->total = $total;
-        $this->per_page = $per_page;
-        $this->current_page = $current_page;
-        $this->last_page = $last_page;
+        parent::__construct($total, $per_page, $current_page, $last_page, $data);
+
         $this->from = $from;
         $this->to = $to;
-        $this->data = $data;
     }
 }
 
@@ -494,5 +503,31 @@ class CreatedCfdiResponse
         $inv = $data["INV"];
         $this->series = $inv["Serie"];
         $this->folio = $inv["Folio"];
+    }
+}
+
+class Draft
+{
+    public $uuid;
+    public $series;
+    public $folio;
+    public $version;
+    public $cfdi_data;
+
+    public function __construct(string $uuid, string $series, int $folio, string $version, Cfdi $cfdi_data)
+    {
+        $this->uuid = $uuid;
+        $this->series = $series;
+        $this->folio = $folio;
+        $this->version = $version;
+        $this->cfdi_data = $cfdi_data;
+    }
+}
+
+class DraftList extends AbstractList
+{
+    public function __construct(int $total, int $per_page, int $current_page, int $last_page, array $data = [])
+    {
+        parent::__construct($total, $per_page, $current_page, $last_page, $data);
     }
 }

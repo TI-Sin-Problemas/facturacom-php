@@ -47,23 +47,34 @@ class Cfdi extends BaseCilent
     private function build_cfdi($data)
     {
         return new Types\Cfdi(
-            $data["RazonSocialReceptor"],
-            $data["Folio"],
-            $data["UID"],
-            $data["UUID"],
-            $data["Subtotal"],
-            $data["Descuento"],
-            $data["Total"],
-            $data["ReferenceClient"],
-            $data["NumOrder"],
-            $data["Receptor"],
-            $data["FechaTimbrado"],
-            $data["Status"],
-            array_key_exists("TipoDocumento", $data) ? $data["TipoDocumento"] : null,
-            $data["Version"],
-            array_key_exists("XML", $data) ? $data["XML"] : null
+            recipient_company_name: array_key_exists("RazonSocialReceptor", $data) ? $data["RazonSocialReceptor"] : null,
+            folio: array_key_exists("Folio", $data) ? $data["Folio"] : null,
+            uid: array_key_exists("UID", $data) ? $data["UID"] : null,
+            uuid: array_key_exists("UUID", $data) ? $data["UUID"] : null,
+            subtotal: array_key_exists("Subtotal", $data) ? $data["Subtotal"] : null,
+            discount: array_key_exists("Descuento", $data) ? $data["Descuento"] : null,
+            total: array_key_exists("Total", $data) ? $data["Total"] : null,
+            reference_client: array_key_exists("ReferenceClient", $data) ? $data["ReferenceClient"] : null,
+            num_order: array_key_exists("NumOrder", $data) ? $data["NumOrder"] : null,
+            recipient: array_key_exists("Receptor", $data) ? $data["Receptor"] : null,
+            stamp_date: array_key_exists("FechaTimbrado", $data) ? $data["FechaTimbrado"] : null,
+            status: array_key_exists("Status", $data) ? $data["Status"] : null,
+            document_type: array_key_exists("TipoDocumento", $data) ? $data["TipoDocumento"] : null,
+            version: array_key_exists("Version", $data) ? $data["Version"] : null,
+            xml: array_key_exists("XML", $data) ? $data["XML"] : null
         );
     }
+
+    private function execute_get_request(array $url_params, array $query_params = null)
+    {
+        $response = $this->get($url_params, $query_params);
+        $data = json_decode($response->getBody(), true);
+        if ($data["status"] != "success") {
+            throw new FacturaComException($data["message"]);
+        }
+        return $data;
+    }
+
     private function execute_post_request(array $url_params, array $data = null)
     {
         $response = $this->post($url_params, $data);
@@ -97,15 +108,14 @@ class Cfdi extends BaseCilent
         int $page = null,
         int $per_page = null
     ) {
-        $body = $this->get(["list"], [
+        $response = $this->execute_get_request(["list"], [
             "month" => $month == null ? null : sprintf("%02d", $month),
             "year" => $year,
             "rfc" => $rfc,
             "type_document" => $type_document,
             "page" => $page,
             "per_page" => $per_page
-        ])->getBody();
-        $response = json_decode($body, true);
+        ]);
 
         return new Types\CfdiList(
             $response["total"],
@@ -349,5 +359,30 @@ class Cfdi extends BaseCilent
         $this->set_alternate_endpoint();
         $response = $this->execute_post_request(["create"], $data);
         return new Types\CreatedCfdiResponse($response);
+    }
+
+    public function all_drafts(int $items_per_page = null, int $page = null)
+    {
+        $response = $this->execute_get_request(["drafts"], [
+            "perPage" => $items_per_page,
+            "page" => $page
+        ]);
+        $data = array_map(function ($item) {
+            return new Types\Draft(
+                uuid: $item["UUID"],
+                series: $item["Serie"],
+                folio: $item["Folio"],
+                version: $item["Version"],
+                cfdi_data: $this->build_cfdi($item["draft"])
+            );
+        }, $response["data"]);
+
+        return new Types\DraftList(
+            total: $response["total"],
+            per_page: $response["perPage"],
+            current_page: $response["currentPage"],
+            last_page: $response["lastPage"],
+            data: $data
+        );
     }
 }
