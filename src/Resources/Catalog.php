@@ -2,8 +2,6 @@
 
 namespace TiSinProblemas\FacturaCom\Resources;
 
-require_once __DIR__ . '/../Types/Catalog.php';
-
 use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
 use TiSinProblemas\FacturaCom\Types;

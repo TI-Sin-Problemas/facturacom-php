@@ -59,7 +59,7 @@ class Cfdi extends BaseCilent
             $data["Receptor"],
             $data["FechaTimbrado"],
             $data["Status"],
-            $data["TipoDocumento"],
+            array_key_exists("TipoDocumento", $data) ? $data["TipoDocumento"] : null,
             $data["Version"],
             array_key_exists("XML", $data) ? $data["XML"] : null
         );
@@ -178,6 +178,49 @@ class Cfdi extends BaseCilent
     }
 
 
+
+    /**
+     * Creates a new CFDI with the given data.
+     *
+     * @param string $customer_uid The UID of the recipient previously created.
+     * @param string $document_type The type of CFDI or document.
+     *                  See \FacturaCom\Constants\DocumentType::values()
+     * @param Types\Item[] $items The items to include in the CFDI.
+     * @param string $cfdi_use The use of the CFDI according to the SAT Catalog.
+     *                  See FacturaCom()->catalog->cfdi_uses->all()
+     * @param int $series_uid The UID of the series previously created.
+     * @param string $payment_method The payment method (forma de pago) code according to the SAT Catalog.
+     *                  See FacturaCom()->catalog->payment_methods->all()
+     * @param string $payment_option The payment option (metodo de pago) code according to the SAT Catalog.
+     *                  See FacturaCom()->catalog->payment_options->all()
+     * @param string $tax_residence The tax residence of the customer if the recipient recides
+     *                  outside of Mexico (default: "").
+     * @param bool $create_draft_on_error Whether to create a draft if an error occurs (default: false).
+     * @param bool $draft Whether to create a CFDI as a draft (default: false).
+     * @param string|null $payment_terms The payment terms (default: null).
+     * @param array $related_cfdi The related CFDI. If the CFDI is related to other CFDI,
+     *                  this value must be an array of UUID of all the related CFDI (default: []).
+     * @param string $currency The currency of the CFDI according to the SAT Catalog (default: "MXN").
+     *                  See FacturaCom()->catalog->currencies->all()
+     * @param float|null $exchange_rate The exchange rate (default: null). This argument is required
+     *                      if the currency is not MXN.
+     * @param string|null $order_number The order number, for internal control only (default: null).
+     * @param DateTime|null $date The date of the CFDI, it is possible to create a CFDI 72 hours in
+     *                              the past (default: null).
+     * @param string|null $comments The comments for the CFDI (default: null).
+     * @param string|null $account The last 4 digits of the bank card or account of the customer (default: null).
+     * @param bool $send_email Whether to send the CFDI by email to the customer (default: true).
+     * @param string|null $expedition_place The zip code of the expedition place (default: null).
+     * @param string|null $global_periodicity In case of a global CFDI, this argumment indicates
+     *                                          the periodicity. See \FacturaCom\Constants\GlobalPeriodicity::values()
+     *                                          (default: null).
+     * @param string|null $global_month In case of a global CFDI, this argument indicates the month for wich to create
+     *                                      the CFDI. See \FacturaCom\Constants\GlobalMonth::values() (default: null).
+     * @param string|null $global_year In case of a global CFDI, this argument indicates the year for wich to create
+     *                                      the CFDI in the format YYYY (default: null).
+     * @throws FacturaComException If an error occurs during CFDI creation.
+     * @return Types\CreatedCfdiResponse The created CFDI response.
+     */
     public function create(
         string $customer_uid,
         string $document_type,
@@ -186,19 +229,22 @@ class Cfdi extends BaseCilent
         int $series_uid,
         string $payment_method,
         string $payment_option,
-        string $currency = "MXN",
         string $tax_residence = "",
         bool $create_draft_on_error = false,
         bool $draft = false,
         string $payment_terms = null,
-        array $related_cfdis = [],
+        array $related_cfdi = [],
+        string $currency = "MXN",
         float $exchange_rate = null,
         string $order_number = null,
         DateTime $date = null,
         string $comments = null,
         string $account = null,
         bool $send_email = true,
-        string $expedition_place = null
+        string $expedition_place = null,
+        string $global_periodicity = null,
+        string $global_month = null,
+        string $global_year = null
     ) {
         $valid_document_types = array_values(Constants\DocumentType::values());
         if (!in_array($document_type, $valid_document_types)) {
@@ -212,11 +258,11 @@ class Cfdi extends BaseCilent
         }
 
         $related = [];
-        foreach ($related_cfdis as $related_cfdi) {
-            if (!$related_cfdi instanceof Types\RelatedCfdi) {
+        foreach ($related_cfdi as $cfdi) {
+            if (!$cfdi instanceof Types\RelatedCfdi) {
                 throw new TypeError("Invalid related CFDI type. Expected Types\RelatedCfdi instance");
             }
-            $related[] = $related_cfdi->get_data_for_api();
+            $related[] = $cfdi->get_data_for_api();
         }
 
         if ($currency != "MXN" && !$exchange_rate) {
@@ -272,6 +318,32 @@ class Cfdi extends BaseCilent
 
         if ($expedition_place) {
             $data["LugarExpedicion"] = $expedition_place;
+        }
+
+        $global_args = [$global_periodicity, $global_month, $global_year];
+        $is_global = count(array_filter($global_args, fn ($arg) => !is_null($arg))) > 0;
+        if ($is_global) {
+            // Validate global values
+            $valid_periodicitys = array_values(Constants\GlobalCfdiPeriodicity::values());
+            if (!in_array($global_periodicity, $valid_periodicitys)) {
+                throw new FacturaComException("Invalid global periodicity. Valid values are: " . implode(", ", $valid_periodicitys));
+            }
+
+            $valid_months = array_values(Constants\GlobalCfdiMonth::values());
+            if (!in_array($global_month, $valid_months)) {
+                throw new FacturaComException("Invalid global month. Valid values are: " . implode(", ", $valid_months));
+            }
+
+            if (!$global_year) {
+                throw new FacturaComException("Global year is required");
+            }
+
+            // Add global information to data
+            $data["InformacionGlobal"] = [
+                "Periodicidad" => $global_periodicity,
+                "Meses" => $global_month,
+                "Año" => $global_year
+            ];
         }
 
         $this->set_alternate_endpoint();
