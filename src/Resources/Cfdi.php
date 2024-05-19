@@ -2,14 +2,11 @@
 
 namespace TiSinProblemas\FacturaCom\Resources;
 
-require_once __DIR__ . '/../Types/Cfdi.php';
-
 use DateTime;
-use ReflectionClass;
 use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
 use TiSinProblemas\FacturaCom\Types;
-use TiSinProblemas\FacturaCom\Constants\DocumentType;
+use TiSinProblemas\FacturaCom\Constants;
 use TypeError;
 
 class Cfdi extends BaseCilent
@@ -203,8 +200,7 @@ class Cfdi extends BaseCilent
         bool $send_email = true,
         string $expedition_place = null
     ) {
-        $document_type_reflection = new ReflectionClass(DocumentType::class);
-        $valid_document_types = $document_type_reflection->getConstants();
+        $valid_document_types = array_values(Constants\DocumentType::values());
         if (!in_array($document_type, $valid_document_types)) {
             throw new FacturaComException("Invalid document type. Valid types are: " . implode(", ", $valid_document_types));
         }

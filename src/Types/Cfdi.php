@@ -3,7 +3,6 @@
 namespace TiSinProblemas\FacturaCom\Types;
 
 use DateTime;
-use ReflectionClass;
 use TiSinProblemas\FacturaCom\Constants\TaxFactorType;
 use TypeError;
 use ValueError;
@@ -153,8 +152,7 @@ class ItemTax
         float $amount,
         string $factor_type = TaxFactorType::TASA
     ) {
-        $tax_factor_reflection = new ReflectionClass(TaxFactorType::class);
-        $tax_factor_constants = $tax_factor_reflection->getConstants();
+        $tax_factor_constants = array_values(TaxFactorType::values());
         if (!in_array($factor_type, $tax_factor_constants)) {
             throw new ValueError("Invalid factor type. Valid types are: " . implode(", ", $tax_factor_constants));
         }

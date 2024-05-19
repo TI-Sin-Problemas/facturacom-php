@@ -4,7 +4,6 @@ namespace TiSinProblemas\FacturaCom\Resources;
 
 require_once __DIR__ . '/../Types/Series.php';
 
-use ReflectionClass;
 use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use TiSinProblemas\FacturaCom\Http\BaseCilent;
 use TiSinProblemas\FacturaCom\Types;
@@ -94,8 +93,7 @@ class Series extends BaseCilent
      */
     public function create(string $letter, string $document_type, int $folio = null): string
     {
-        $document_type_reflection = new ReflectionClass(Constants\DocumentType::class);
-        $valid_document_types = $document_type_reflection->getConstants();
+        $valid_document_types = array_values(Constants\DocumentType::values());
         if (!in_array($document_type, $valid_document_types)) {
             throw new FacturaComException("Invalid document type. Valid types are: " . implode(", ", $valid_document_types));
         }

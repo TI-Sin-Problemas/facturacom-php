@@ -2,7 +2,17 @@
 
 namespace TiSinProblemas\FacturaCom\Constants;
 
-class DocumentType
+abstract class BaseConstants
+{
+    public static function values()
+    {
+        echo static::class;
+        $reflection = new \ReflectionClass(static::class);
+        return $reflection->getConstants();
+    }
+}
+
+class DocumentType extends BaseConstants
 {
     const FACTURA = "factura"; // Factura
     const FACTURA_HOTEL = "factura_hotel"; // Factura para hoteles
@@ -17,11 +27,44 @@ class DocumentType
     const CARTA_PORTE_INGRESO = "carta_porte_ingreso"; // Carta porte de Ingreso
     const PAGO = "pago"; // Pago
     const RETENCION = "retencion"; // Retención
+
+
 }
 
-class TaxFactorType
+class TaxFactorType extends BaseConstants
 {
     const TASA = "Tasa";
     const CUOTA = "Cuota";
     const EXENTO = "Exento";
+}
+
+class GlobalCfdiPeriodicity extends BaseConstants
+{
+    const DIARIO = "01";
+    const SEMANAL = "02";
+    const QUINCENAL = "03";
+    const MENSUAL = "04";
+    const BIMESTRAL = "05";
+}
+
+class GlobalCfdiMonth extends BaseConstants
+{
+    const ENERO = "01";
+    const FEBRERO = "02";
+    const MARZO = "03";
+    const ABRIL = "04";
+    const MAYO = "05";
+    const JUNIO = "06";
+    const JULIO = "07";
+    const AGOSTO = "08";
+    const SEPTIEMBRE = "09";
+    const OCTUBRE = "10";
+    const NOVIEMBRE = "11";
+    const DICIEMBRE = "12";
+    const ENERO_FEBRERO = "13";
+    const MARZO_ABRIL = "14";
+    const MAYO_JUNIO = "15";
+    const JULIO_AGOSTO = "16";
+    const SEPTIEMBRE_OCTUBRE = "17";
+    const NOVIEMBRE_DICIEMBRE = "18";
 }
