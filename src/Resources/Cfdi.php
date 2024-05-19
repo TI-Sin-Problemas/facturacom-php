@@ -101,7 +101,7 @@ class Cfdi extends BaseCilent
         int $per_page = null
     ) {
         $body = $this->get(["list"], [
-            "month" => sprintf("%02d", $month),
+            "month" => $month == null ? null : sprintf("%02d", $month),
             "year" => $year,
             "rfc" => $rfc,
             "type_document" => $type_document,
