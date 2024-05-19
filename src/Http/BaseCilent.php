@@ -6,7 +6,7 @@ use TiSinProblemas\FacturaCom\Exceptions\FacturaComException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
-class BaseCilent
+abstract class BaseCilent
 {
     protected $SANDBOX_BASE_URL = "https://sandbox.factura.com/api";
     protected $PROD_BASE_URL = "https://api.factura.com";

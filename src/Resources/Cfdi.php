@@ -69,7 +69,7 @@ class Cfdi extends BaseCilent
     {
         $response = $this->get($url_params, $query_params);
         $data = json_decode($response->getBody(), true);
-        if ($data["status"] != "success") {
+        if (array_key_exists("status", $data) && $data["status"] != "success") {
             throw new FacturaComException($data["message"]);
         }
         return $data;
@@ -359,30 +359,5 @@ class Cfdi extends BaseCilent
         $this->set_alternate_endpoint();
         $response = $this->execute_post_request(["create"], $data);
         return new Types\CreatedCfdiResponse($response);
-    }
-
-    public function all_drafts(int $items_per_page = null, int $page = null)
-    {
-        $response = $this->execute_get_request(["drafts"], [
-            "perPage" => $items_per_page,
-            "page" => $page
-        ]);
-        $data = array_map(function ($item) {
-            return new Types\Draft(
-                uuid: $item["UUID"],
-                series: $item["Serie"],
-                folio: $item["Folio"],
-                version: $item["Version"],
-                cfdi_data: $this->build_cfdi($item["draft"])
-            );
-        }, $response["data"]);
-
-        return new Types\DraftList(
-            total: $response["total"],
-            per_page: $response["perPage"],
-            current_page: $response["currentPage"],
-            last_page: $response["lastPage"],
-            data: $data
-        );
     }
 }
